@@ -1,0 +1,575 @@
+:root {
+    --bg: #eef1f5;
+    --card: #ffffff;
+    --surface: rgba(255, 255, 255, 0.7);
+    --surface-strong: rgba(15, 23, 42, 0.06);
+    --border: rgba(15, 23, 42, 0.1);
+    --text: #0f172a;
+    --sub: #64748b;
+    --accent: #007aff;
+    --accent-soft: rgba(0, 122, 255, 0.1);
+    --danger: #ef4444;
+    --ok-bg: #dcfce7;
+    --ok-color: #15803d;
+    --overlay-bg: rgba(15, 23, 42, 0.5);
+    --menu-bg: rgba(255, 255, 255, 0.92);
+    --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="dark"] {
+    --bg: #0b0b0d;
+    --card: #17171a;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-strong: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #f1f5f9;
+    --sub: #94a3b8;
+    --accent: #007aff;
+    --accent-soft: rgba(0, 122, 255, 0.16);
+    --danger: #f87171;
+    --ok-bg: #133a1b;
+    --ok-color: #8ce99a;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+    --menu-bg: rgba(26, 26, 29, 0.95);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* Landing page is full-bleed (no workspace padding) */
+body.landing-mode {
+    padding: 0;
+}
+
+.task-list::-webkit-scrollbar,
+.completed-list::-webkit-scrollbar,
+.sidebar-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.task-list::-webkit-scrollbar-thumb,
+.completed-list::-webkit-scrollbar-thumb,
+.sidebar-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* ---------- Login ---------- */
+
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Frosted backdrop over the landing page */
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(12px);
+    padding: 20px;
+}
+
+.login-card {
+    width: min(400px, 100%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: var(--shadow);
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon-lg {
+    width: 36px;
+    height: 36px;
+    fill: var(--accent);
+}
+
+.login-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+
+.login-sub {
+    font-size: 0.85rem;
+    color: var(--sub);
+    font-style: italic;
+}
+
+.login-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.login-tab {
+    flex: 1;
+    padding: 10px 0;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--sub);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-error {
+    min-height: 16px;
+    font-size: 0.8rem;
+    color: var(--danger);
+}
+
+.login-note {
+    font-size: 0.75rem;
+    color: var(--sub);
+    text-align: center;
+}
+
+/* ---------- Fields & buttons ---------- */
+
+.field {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    background: var(--card);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+}
+
+.field:focus {
+    border-color: var(--accent);
+}
+
+.field.small {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+}
+
+.primary-btn {
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.primary-btn:hover {
+    opacity: 0.9;
+}
+
+.primary-btn.small {
+    padding: 8px 14px;
+}
+
+.ghost-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ghost-btn:hover {
+    background: var(--surface-strong);
+}
+
+.danger-ghost-btn {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ---------- Menus & quick actions ---------- */
+
+.menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: left;
+    color: var(--text);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: var(--surface-strong);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--sub);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.delete-btn:hover {
+    color: var(--danger);
+}
+
+/* ---------- Sidebar (grounded, full-height fixed panel) ---------- */
+
+.sidebar-row.active {
+    background: var(--accent-soft);
+    border-color: var(--accent) !important;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+/* Collapsed: icon rail (w-16). Header + main content slide over to match. */
+.sidebar.collapsed {
+    width: 64px;
+}
+
+.sidebar.collapsed .side-label,
+.sidebar.collapsed .side-count,
+.sidebar.collapsed .side-actions,
+.sidebar.collapsed .add-cat-btn {
+    display: none;
+}
+
+/* Brand block in collapsed mode: the collapse toggle stacks below the logo,
+   above the divider — it can never overlap the logo icon. */
+.sidebar.collapsed .sidebar-brand {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 6px 10px;
+}
+
+.sidebar.collapsed .sidebar-title {
+    display: none;
+}
+
+/* Icon-only rows, centered */
+.sidebar.collapsed .sidebar-row {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sidebar.collapsed .side-emoji {
+    font-size: 1.05rem;
+}
+
+/* Tooltips may overhang the rail, so the nav must not clip them */
+.sidebar.collapsed .sidebar-nav {
+    overflow-y: visible;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Floating tooltip to the right of a folder icon (collapsed mode only) */
+.side-tip {
+    display: none;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    pointer-events: none;
+}
+
+.sidebar.collapsed .sidebar-row:hover .side-tip {
+    display: block;
+}
+
+/* Icon-only footer button when collapsed */
+.sidebar.collapsed #sidebar-logout {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Header + main content clear the fixed sidebar (w-64 = 16rem) */
+#app > header.app-header,
+#app > main.app-main {
+    margin-left: 16rem;
+    transition: margin-left 0.3s ease;
+}
+
+/* ...and close the gap when the sidebar is collapsed (w-16 = 4rem) */
+.sidebar.collapsed ~ header.app-header,
+.sidebar.collapsed ~ main.app-main {
+    margin-left: 4rem;
+}
+
+/* ---------- Column / card behavior ---------- */
+
+.column.drag-over {
+    border-color: var(--accent) !important;
+    background: var(--accent-soft);
+}
+
+.column.ai-target {
+    outline: 2px dashed var(--accent);
+    outline-offset: -2px;
+}
+
+/* ---------- Task completion animation (Apple Reminders pattern) ---------- */
+
+/* Phase 2 (after the 400ms completion hold): the card smoothly collapses
+   out of the column. margin-bottom -8px cancels the list's flex gap so the
+   collapse is seamless. */
+.task-card.task-exiting {
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.95);
+    height: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: -8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.task-card.dragging {
+    opacity: 0.4;
+    border-style: dashed;
+}
+
+/* ---------- Keyboard shortcut helper pill ---------- */
+
+.shortcut-pill {
+    opacity: 0;
+}
+
+/* First-visit onboarding callout: centered above the dock, toast-like */
+.shortcut-pill.pill-onboarding {
+    bottom: 172px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    transition: opacity 0.5s ease;
+}
+
+.shortcut-pill.pill-onboarding.pill-show {
+    opacity: 1;
+}
+
+/* Persistent state: faint borderless inline text, bottom-right corner */
+.shortcut-pill.pill-subtle {
+    bottom: 12px;
+    right: 16px;
+    gap: 4px;
+    opacity: 0.35;
+}
+
+.shortcut-pill.pill-subtle:hover {
+    opacity: 1;
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    max-width: 90vw;
+}
+
+/* ---------- AI status ---------- */
+
+.ai-status {
+    position: fixed;
+    bottom: 175px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    max-width: 92vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.ai-status.busy {
+    color: var(--sub);
+    background: var(--surface-strong);
+    animation: pulse 1.2s infinite;
+}
+
+.ai-status.ok {
+    color: var(--ok-color);
+    background: var(--ok-bg);
+}
+
+.ai-status.off {
+    color: var(--sub);
+    background: var(--surface-strong);
+}
+
+/* ---------- Mic listening ---------- */
+
+.mic-btn.listening {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ---------- Dock priority pills ---------- */
+
+.prio-btn.prio-high.active {
+    background: rgba(239, 68, 68, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.5);
+}
+
+.prio-btn.prio-med.active {
+    background: rgba(249, 115, 22, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.5);
+}
+
+.prio-btn.prio-low.active {
+    background: rgba(234, 179, 8, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(234, 179, 8, 0.5);
+}
+
+.prio-btn.prio-none.active {
+    background: var(--surface-strong);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* ---------- Misc ---------- */
+
+/* Apple-style checkbox: rounded square that fills with a spring checkmark */
+.checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.checkbox:hover {
+    border-color: var(--accent);
+}
+
+.checkbox:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    animation: check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes check-pop {
+    from { transform: rotate(45deg) scale(0); }
+    to { transform: rotate(45deg) scale(1); }
+}

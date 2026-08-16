@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskly AI - Sorting your day made simple</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z'/></svg>" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Tailwind (Play CDN) + class-based dark mode -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+</head>
+<body>
+
+    <!-- ============ SECTION 1: LANDING PAGE ============ -->
+    <div id="landing" class="min-h-screen bg-slate-50 text-slate-900">
+        <!-- Landing header -->
+        <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+            <div class="flex items-center gap-2.5">
+                <svg class="h-8 w-8" viewBox="0 0 24 24" fill="#2563eb"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                <span class="text-xl font-bold tracking-tight text-slate-900">Taskly AI</span>
+            </div>
+            <button id="landing-signin" type="button"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                Sign In
+            </button>
+        </header>
+
+        <!-- Hero -->
+        <main class="mx-auto max-w-4xl px-6 pb-20 pt-16 text-center sm:pt-24">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-600">
+                ✨ AI-Powered Task Management
+            </span>
+            <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+                Sorting your day, made <span class="text-blue-600">effortlessly simple.</span>
+            </h1>
+            <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500">
+                Taskly AI automatically categorizes, prioritizes, and schedules your daily to-dos into a clean, distraction-free board.
+            </p>
+            <button id="landing-cta" type="button"
+                class="mt-9 rounded-xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 active:scale-[0.98]">
+                Try Taskly AI Free →
+            </button>
+        </main>
+
+        <!-- Value highlights -->
+        <section class="mx-auto grid max-w-5xl gap-6 px-6 pb-20 sm:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🎤</div>
+                <h3 class="mt-4 text-base font-bold text-slate-900">Instant Capture</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Voice and text quick-add dock for capturing tasks in seconds — no forms, no friction.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🤖</div>
+                <h3 class="mt-4 text-base font-bold text-slate-900">Smart Auto-Sort</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Automatically organizes tasks into category columns with priority and deadline tags.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🧹</div>
+                <h3 class="mt-4 text-base font-bold text-slate-900">Zero Clutter</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Symmetrical, centered board layout that adapts to your workload — nothing piles up.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ SECTION 2: AUTHENTICATION MODAL ============ -->
+    <div class="login-overlay" id="login-overlay" hidden>
+        <div class="login-card relative">
+            <button id="auth-close" type="button" title="Close"
+                class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--sub)] transition hover:bg-[var(--surface-strong)] hover:text-[var(--text)]">✕</button>
+            <div class="login-brand">
+                <svg class="brand-icon-lg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                <div>
+                    <div class="login-title">Taskly AI</div>
+                    <div class="login-sub">Sorting your day made simple.</div>
+                </div>
+            </div>
+            <div class="login-tabs">
+                <button class="login-tab active" id="tab-login" type="button">Sign In</button>
+                <button class="login-tab" id="tab-register" type="button">Create Account</button>
+            </div>
+            <form id="login-form" class="login-form">
+                <input id="login-user" class="field" autocomplete="username" placeholder="Username">
+                <input id="login-pass" type="password" class="field" autocomplete="current-password" placeholder="Password">
+                <div id="login-error" class="login-error"></div>
+                <button class="primary-btn" type="submit">Sign In</button>
+            </form>
+            <form id="register-form" class="login-form" hidden>
+                <input id="reg-user" class="field" autocomplete="username" placeholder="Choose a username">
+                <input id="reg-pass" type="password" class="field" autocomplete="new-password" placeholder="Password">
+                <input id="reg-confirm" type="password" class="field" autocomplete="new-password" placeholder="Confirm password">
+                <div id="reg-error" class="login-error"></div>
+                <button class="primary-btn" type="submit">Create Account</button>
+            </form>
+            <div class="login-note">Credentials are password-hashed and stored in this browser's local database.</div>
+        </div>
+    </div>
+
+    <!-- ============ SECTION 3: KANBAN WORKSPACE (grounded SaaS layout) ============ -->
+    <div id="app" hidden>
+
+        <!-- Full-height fixed sidebar: grounded left panel, no floating card -->
+        <aside id="sidebar" class="sidebar fixed left-0 top-0 z-40 flex h-screen w-64 flex-col justify-between border-r border-slate-200 bg-white transition-all duration-300 dark:border-white/10 dark:bg-[#161618]">
+
+            <!-- Brand block: logo + title + collapse toggle.
+                 Expanded: toggle sits beside the title.
+                 Collapsed: title hides and the toggle stacks below the logo,
+                 cleanly above the divider — never overlapping the icon. -->
+            <div class="sidebar-top flex min-h-0 flex-col">
+                <div class="sidebar-brand flex items-center justify-between gap-2 px-4 pb-3 pt-4">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                        <svg class="side-emoji h-8 w-8 shrink-0" viewBox="0 0 24 24" fill="#007AFF"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                        <div class="sidebar-title flex min-w-0 flex-col leading-tight">
+                            <span class="truncate text-base font-bold tracking-tight text-slate-900 dark:text-zinc-100">Taskly AI</span>
+                            <span class="truncate text-[10.5px] italic text-slate-500 dark:text-white/50">Sorting your day made simple.</span>
+                        </div>
+                    </div>
+                    <!-- Collapse / expand dropdown control -->
+                    <div class="relative">
+                        <button id="sidebar-toggle" type="button" title="Sidebar options"
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:hover:bg-white/10">☰</button>
+                        <div id="sidebar-dd" class="hidden absolute left-0 top-11 z-50 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1a1a1d]/95">
+                            <button id="dd-collapse" type="button" class="menu-item flex items-center justify-between">📉 Collapse sidebar</button>
+                            <button id="dd-expand" type="button" class="menu-item flex items-center justify-between">📈 Expand sidebar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mx-4 h-px shrink-0 bg-slate-200 dark:bg-white/10"></div>
+
+                <!-- Category navigation: All tasks + categories + add category -->
+                <nav id="sidebar-list" class="sidebar-nav flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3"></nav>
+            </div>
+
+            <!-- Sidebar footer: sign out -->
+            <div class="sidebar-bottom flex shrink-0 flex-col gap-1 border-t border-slate-200 p-3 dark:border-white/10">
+                <button id="sidebar-logout" type="button" title="Sign out"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-red-500/10 hover:text-red-500 dark:text-white/50 dark:hover:text-red-400">
+                    <span class="side-emoji text-sm">⏻</span><span class="side-label">Sign out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Unified top header: search / theme / profile -->
+        <header class="app-header sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/80 px-6 backdrop-blur-md dark:border-white/10 dark:bg-[#161618]/80">
+            <!-- Quick search (Ctrl+K) -->
+            <div class="relative hidden sm:block">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input id="search-input" type="text" placeholder="Search tasks…" autocomplete="off"
+                    class="w-48 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 md:w-64 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:placeholder:text-white/40">
+                <kbd id="search-kbd" class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-white/50">Ctrl K</kbd>
+                <button id="search-clear" type="button" title="Clear search"
+                    class="absolute right-2 top-1/2 hidden h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200 text-[10px] text-slate-500 transition hover:text-red-500 dark:bg-white/10 dark:text-white/60">✕</button>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <!-- Theme toggle (☀️ / 🌙) -->
+                <button id="theme-toggle" type="button" title="Toggle light / dark mode"
+                    class="flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:hover:bg-white/10">
+                    <span id="theme-icon">🌙</span><span id="theme-text">Dark</span>
+                </button>
+
+                <!-- User profile -->
+                <div class="relative">
+                    <button id="user-btn" type="button"
+                        class="flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
+                        <span id="user-avatar" class="flex h-6 w-6 items-center justify-center rounded-full bg-[#007AFF] text-[11px] font-bold text-white">V</span>
+                        <span id="user-name" class="max-w-[110px] truncate text-sm font-semibold text-slate-800 dark:text-zinc-100"></span>
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 top-12 z-30 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1a1a1d]/95">
+                        <div id="user-drop-name" class="truncate px-2 py-1.5 text-sm font-medium text-slate-800 dark:text-zinc-100"></div>
+                        <button id="logout-btn" type="button" class="menu-item">⏻ Log out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content: centered kanban board + overdue -->
+        <main class="app-main px-6 pb-44 pt-6">
+            <div class="board flex w-full flex-wrap items-start justify-center gap-6" id="board"></div>
+
+            <section id="overdue-section" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-lg shadow-black/5 backdrop-blur dark:border-white/10 dark:bg-white/5">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-sm font-semibold text-slate-800 dark:text-zinc-100">⏰ Overdue — pending from earlier days</span>
+                </div>
+                <div class="mt-2.5 flex flex-col gap-2" id="overdue-list"></div>
+            </section>
+        </main>
+
+        <!-- Floating bottom dock: solid card, uniform generous padding (px-5 py-4),
+             no hardcoded height. Top row: input (left) + mic (right).
+             Bottom row: pills (left) + Add button (right), single line,
+             Add always sits INSIDE the box with equal inner margins. -->
+        <form id="add-form" class="add-form fixed bottom-6 left-1/2 z-40 flex w-[calc(100vw-1.5rem)] max-w-[800px] -translate-x-1/2 flex-col gap-2.5 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-800 shadow-2xl transition-colors duration-200 focus-within:border-blue-500 dark:border-white/10 dark:bg-[#1c1c1f] dark:text-zinc-100 dark:focus-within:border-blue-500">
+            <!-- Top row: task input (left) + voice mic (right) -->
+            <div class="flex w-full items-center justify-between gap-3">
+                <input type="text" id="task-input"
+                    class="min-w-0 flex-1 bg-transparent px-2 py-1.5 text-[15px] text-slate-800 outline-none placeholder:text-slate-400 dark:text-zinc-100 dark:placeholder:text-white/40"
+                    placeholder="What do you need to do? (Press Enter)" autocomplete="off">
+                <button type="button" id="mic-btn" title="Add by voice (works best in Chrome)"
+                    class="mic-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                </button>
+            </div>
+            <!-- Bottom row: control groups with faint subtitles directly BELOW each
+                 control (title case, no caps), Add button on the right. -->
+            <div class="mt-1 flex w-full items-start justify-between gap-3">
+                <div class="flex shrink-0 items-start gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <!-- Category dropdown -->
+                    <div class="flex flex-col items-start gap-1">
+                        <select id="category-select"
+                            class="flex shrink-0 items-center whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition hover:bg-slate-50 focus:border-blue-500 cursor-pointer dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+                            title="Category — ✨ Auto lets AI bucket the task"></select>
+                        <span class="text-[10px] font-normal text-slate-400 opacity-50 select-none dark:text-zinc-500">Auto bucketer</span>
+                    </div>
+
+                    <!-- Priority toggle -->
+                    <div class="flex flex-col items-start gap-1">
+                        <div id="prio-group" class="prio-group flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/5">
+                            <button type="button" class="prio-btn prio-high rounded-md px-2 py-1 text-xs font-bold text-red-500 transition hover:bg-red-500/10" data-priority="high" title="High priority">!!!</button>
+                            <button type="button" class="prio-btn prio-med active rounded-md px-2 py-1 text-xs font-bold text-orange-500 transition hover:bg-orange-500/10" data-priority="med" title="Medium priority">!!</button>
+                            <button type="button" class="prio-btn prio-low rounded-md px-2 py-1 text-xs font-bold text-yellow-600 transition hover:bg-yellow-500/10 dark:text-yellow-400" data-priority="low" title="Low priority">!</button>
+                            <button type="button" class="prio-btn prio-none rounded-md px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 dark:text-white/60 dark:hover:bg-white/10" data-priority="none" title="No priority">None</button>
+                        </div>
+                        <span class="text-[10px] font-normal text-slate-400 opacity-50 select-none dark:text-zinc-500">Priority level</span>
+                    </div>
+
+                    <!-- Deadline picker -->
+                    <div class="flex flex-col items-start gap-1">
+                        <select id="deadline-select"
+                            class="flex shrink-0 items-center whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition hover:bg-slate-50 focus:border-blue-500 cursor-pointer dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+                            title="Deadline">
+                            <option value="">📅 No deadline</option>
+                            <option value="today">📅 Today</option>
+                            <option value="tomorrow">📅 Tomorrow</option>
+                            <option value="custom">📅 Custom Date…</option>
+                        </select>
+                        <span class="text-[10px] font-normal text-slate-400 opacity-50 select-none dark:text-zinc-500">Set deadline</span>
+                    </div>
+
+                    <!-- Reminder pill toggle -->
+                    <div class="flex flex-col items-start gap-1">
+                        <button type="button" id="reminder-toggle"
+                            class="reminder-toggle flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors cursor-pointer select-none hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:bg-white/10"
+                            title="Generates .ics file for Outlook, Apple, & Google Calendar"
+                            aria-pressed="false">🔔 Remind me</button>
+                        <span class="text-[10px] font-normal text-slate-400 opacity-50 select-none dark:text-zinc-500">Add reminder in Outlook</span>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#007AFF] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#0a85ff] active:scale-95">Add <kbd class="rounded bg-white/20 px-1 py-0.5 text-[10px] font-semibold">↵</kbd></button>
+            </div>
+            <div class="ai-status" id="ai-status" hidden></div>
+        </form>
+
+        <!-- Custom date & time popover (opened from the deadline select) -->
+        <div id="custom-popover" class="fixed bottom-[172px] left-1/2 z-50 hidden w-[min(340px,90vw)] -translate-x-1/2 flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--menu-bg)] p-4 shadow-2xl backdrop-blur-xl">
+            <div class="text-sm font-semibold text-[var(--text)]">📅 Custom date &amp; time</div>
+            <input type="date" id="custom-date-input" class="field w-full">
+            <input type="time" id="custom-time-input" class="field w-full">
+            <div class="flex justify-end gap-2">
+                <button id="custom-cancel" class="ghost-btn small" type="button">Cancel</button>
+                <button id="custom-ok" class="primary-btn small" type="button">Save</button>
+            </div>
+        </div>
+
+        <!-- Non-intrusive Undo toast: floats above the dock after completion -->
+        <div id="undo-toast" class="fixed bottom-36 left-1/2 z-50 hidden -translate-x-1/2 items-center gap-3 rounded-full bg-slate-900/90 px-4 py-2 text-xs text-white shadow-lg backdrop-blur-md dark:bg-white/90 dark:text-slate-900">
+            <span>Task completed</span>
+            <button id="undo-btn" type="button" class="font-semibold underline underline-offset-2 hover:opacity-80">Undo</button>
+        </div>
+
+        <!-- Keyboard shortcut helper pill: prominent onboarding callout on the
+             first visit (fades after 5s / first interaction), then a faint,
+             borderless inline pill anchored bottom-right. -->
+        <div id="shortcut-pill" class="shortcut-pill pointer-events-none fixed z-40 hidden items-center text-xs text-[var(--sub)] transition-opacity duration-200">
+            <kbd class="rounded border border-[var(--border)] bg-[var(--surface-strong)] px-1 font-semibold text-[var(--text)]">Ctrl+K</kbd> Search
+            <span class="mx-0.5">·</span>
+            <kbd class="rounded border border-[var(--border)] bg-[var(--surface-strong)] px-1 font-semibold text-[var(--text)]">N</kbd> New Task
+        </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="data/default-tasks.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
