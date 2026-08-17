@@ -33,9 +33,13 @@
     let addingCat = false;
     let reminderOn = false;
 
+    /* Ordered promise chain so SQLite saves never race each other. */
+    let saveQueue = Promise.resolve();
+    let shortcutsSeen = localStorage.getItem('taskly_shortcuts_seen') === 'true';
+
     /* Reminder pill toggle: keeps a boolean and reflects it on the button
        (default off-state styling lives in the HTML; these classes swap on). */
-    const REMINDER_ON_CLASSES = ['border-blue-500', 'bg-blue-50', 'text-blue-600', 'font-semibold', 'shadow-sm', 'dark:border-blue-500/50', 'dark:bg-blue-950/40', 'dark:text-blue-400'];
+    const REMINDER_ON_CLASSES = ['border-violet-500', 'bg-violet-50', 'text-violet-600', 'font-semibold', 'shadow-sm', 'dark:border-violet-500/50', 'dark:bg-violet-950/40', 'dark:text-violet-400'];
     const REMINDER_OFF_CLASSES = ['border-slate-200', 'bg-slate-50', 'text-slate-600', 'font-medium', 'dark:border-white/10', 'dark:bg-zinc-800/50', 'dark:text-zinc-400'];
 
     function setReminderOn(on) {
@@ -262,7 +266,19 @@
     }
 
     function saveState() {
-        DB.saveData(state.user, { categories: state.categories, tasks: state.tasks });
+        const payload = {
+            categories: state.categories,
+            tasks: state.tasks,
+            settings: {
+                theme: document.documentElement.getAttribute('data-theme') || 'dark',
+                sidebar_collapsed: state.sidebarCollapsed,
+                shortcuts_seen: shortcutsSeen,
+                catArchive: state.catArchive,
+                catSort: state.catSort
+            }
+        };
+        saveQueue = saveQueue.catch(function () { }).then(function () { return DB.saveState(payload); });
+        return saveQueue;
     }
 
     function purgeOldArchived() {
@@ -314,6 +330,11 @@
             openMenu.remove();
             openMenu = null;
         }
+        /* Hide every inline priority popover (click-away / Escape / menu switch) */
+        document.querySelectorAll('.prio-pop').forEach(function (p) {
+            p.classList.add('hidden');
+            p.classList.remove('flex');
+        });
     }
 
     /* Click-to-edit via contenteditable: toggles the attribute on the existing
@@ -323,7 +344,7 @@
        The caller's commit callback is responsible for re-rendering. */
     function startInlineEdit(el, value, commit) {
         if (el.isContentEditable) return;
-        const EDIT_CLASSES = ['outline-none', 'ring-2', 'ring-blue-500/40', 'dark:ring-blue-400/40', 'rounded', 'px-1', '-mx-1', 'bg-slate-100/50', 'dark:bg-white/5'];
+        const EDIT_CLASSES = ['outline-none', 'ring-2', 'ring-violet-500/40', 'dark:ring-violet-400/40', 'rounded', 'px-1', '-mx-1', 'bg-slate-100/50', 'dark:bg-white/5'];
         let done = false;
         const finish = function (commitIt) {
             if (done) return;
@@ -382,7 +403,17 @@
             /* Full titles always visible: wrap to multiple lines, never ellipsis */
             '<div class="min-w-0 flex-1 whitespace-normal break-words text-sm font-medium leading-snug ' + (task.archived ? 'text-[var(--sub)]' : 'text-[var(--text)]') + '" data-edit="title" title="Click to edit">' + escapeHtml(task.title) + '</div>' +
             '<div class="flex shrink-0 items-center gap-1.5">' +
-                (prioPill ? '<span class="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ' + prioPill + '">' + prio + '</span>' : '') +
+                /* Interactive priority badge: click to open the priority popover */
+                '<span class="relative shrink-0">' +
+                    '<button type="button" class="prio-badge cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-semibold transition-transform hover:scale-105 ' + (prioPill || 'border-[var(--border)] bg-[var(--surface-strong)] text-[var(--sub)]') + '" data-prio="' + task.priority + '" title="Change priority">' + (prio || '—') + '</button>' +
+                    (task.archived ? '' :
+                    '<div class="prio-pop absolute right-0 top-full z-50 mt-1 hidden min-w-[120px] flex-col gap-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-100 dark:border-white/10 dark:bg-[#252529]">' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="high"><span class="font-bold text-red-500">!!!</span> High' + (task.priority === 'high' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="med"><span class="font-bold text-amber-500">!!</span> Medium' + (task.priority === 'med' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="low"><span class="font-bold text-yellow-400">!</span> Low' + (task.priority === 'low' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="none"><span class="text-slate-400 dark:text-zinc-500">None</span>' + (task.priority === 'none' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+                    '</div>') +
+                '</span>' +
                 (badge ? '<span class="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ' + duePill + '">' + escapeHtml(badge.label) + (badge.cls === 'due' ? ' · ' + escapeHtml(fmtShort(task.dueDate)) : '') + '</span>' : '') +
                 (task.reminder ? '<span class="text-[11px] text-[var(--sub)]" title="Reminder">🔔</span>' : '') +
             '</div>' +
@@ -427,6 +458,39 @@
                 renderAll();
             });
         });
+
+        /* Interactive priority badge: opens the popover, selection updates the
+           task in place (no full re-render) and re-marks the active option. */
+        const badgeBtn = card.querySelector('.prio-badge');
+        const prioPop = card.querySelector('.prio-pop');
+        if (badgeBtn && prioPop) {
+            badgeBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (!prioPop.classList.contains('hidden')) { closeAllMenus(); return; }
+                closeAllMenus();
+                prioPop.classList.remove('hidden');
+                prioPop.classList.add('flex');
+            });
+            const PRIO_BADGE_BASE = 'prio-badge cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-semibold transition-transform hover:scale-105 ';
+            prioPop.querySelectorAll('.prio-opt').forEach(function (opt) {
+                opt.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const p = opt.dataset.prio;
+                    task.priority = p;
+                    saveState();
+                    badgeBtn.dataset.prio = p;
+                    badgeBtn.textContent = PRIO_LABEL[p] || '—';
+                    badgeBtn.className = PRIO_BADGE_BASE + (PRIO_PILL[p] || 'border-[var(--border)] bg-[var(--surface-strong)] text-[var(--sub)]');
+                    prioPop.querySelectorAll('.prio-opt').forEach(function (o) {
+                        const mark = o.querySelector('.prio-check');
+                        if (mark) mark.remove();
+                        if (o.dataset.prio === p) o.insertAdjacentHTML('beforeend', '<span class="prio-check text-[#8B5CF6]">✓</span>');
+                    });
+                    closeAllMenus();
+                });
+            });
+        }
+
         card.querySelector('.card-del').addEventListener('click', function () {
             state.tasks = state.tasks.filter(function (t) { return t.id !== task.id; });
             saveState();
@@ -447,7 +511,7 @@
         const item = document.createElement('div');
         item.className = 'mini-item flex items-center gap-2.5 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-3 py-2';
         item.innerHTML =
-            '<input type="checkbox" class="checkbox shrink-0 cursor-pointer accent-[#007AFF]">' +
+            '<input type="checkbox" class="checkbox shrink-0 cursor-pointer accent-[#8B5CF6]">' +
             '<span class="min-w-0 flex-1 whitespace-normal break-words text-[13px] text-[var(--text)]" data-edit="title" title="Click to edit">' + escapeHtml(task.title) + '</span>' +
             '<span class="rounded-md border border-red-500/30 bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-400">' + escapeHtml(dueBadge(task.dueDate).label) + '</span>' +
             (PRIO_PILL[task.priority] ? '<span class="rounded-md border px-1.5 py-0.5 text-[10px] font-bold ' + PRIO_PILL[task.priority] + '">' + (PRIO_LABEL[task.priority] || '') + '</span>' : '') +
@@ -485,9 +549,9 @@
         menu.className = 'col-menu absolute right-0 top-12 z-30 w-52 rounded-xl border border-[var(--border)] bg-[var(--menu-bg)] p-1.5 shadow-2xl backdrop-blur-xl';
         menu.innerHTML =
             '<div class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--sub)]">Sort by</div>' +
-            '<button type="button" class="menu-item" data-sort="due">🗓️ Due date' + (sort === 'due' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
-            '<button type="button" class="menu-item" data-sort="priority">⚡ Priority' + (sort === 'priority' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
-            '<button type="button" class="menu-item" data-sort="created">🕐 Created' + (sort === 'created' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="due">🗓️ Due date' + (sort === 'due' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="priority">⚡ Priority' + (sort === 'priority' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="created">🕐 Created' + (sort === 'created' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
             '<div class="my-1 h-px bg-[var(--border)]"></div>' +
             '<button type="button" class="menu-item clear-item text-[var(--danger)] hover:bg-red-500/10">🧹 Clear completed</button>';
 
@@ -546,7 +610,7 @@
                         '<button type="button" class="col-menu-btn flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-strong)] text-[var(--sub)] transition hover:bg-[var(--surface-strong)] hover:text-[var(--text)]" title="Column options">⋮</button>' +
                     '</div>' +
                     '<div class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-[var(--border)]">' +
-                        '<div class="h-full rounded-full bg-gradient-to-r from-[#007AFF] to-emerald-400 transition-all duration-500" style="width:' + pct + '%"></div>' +
+                        '<div class="h-full rounded-full bg-gradient-to-r from-[#8B5CF6] to-emerald-400 transition-all duration-500" style="width:' + pct + '%"></div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="task-list flex flex-1 flex-col gap-2 overflow-y-auto pr-1"></div>';
@@ -562,7 +626,7 @@
             if (active.length === 0) {
                 const drop = document.createElement('button');
                 drop.type = 'button';
-                drop.className = 'drop-zone mt-2 w-full cursor-pointer rounded-xl border-2 border-dashed border-[var(--border)] px-3 py-3 text-xs text-[var(--sub)] transition hover:border-[#007AFF]/60 hover:bg-[#007AFF]/5 hover:text-[#007AFF]';
+                drop.className = 'drop-zone mt-2 w-full cursor-pointer rounded-xl border-2 border-dashed border-[var(--border)] px-3 py-3 text-xs text-[var(--sub)] transition hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6]';
                 drop.textContent = '+ Drag task here or click to add';
                 drop.addEventListener('click', function () {
                     $('category-select').value = cat;
@@ -709,7 +773,7 @@
         } else {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'add-cat-btn flex w-full items-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-2.5 py-2 text-sm text-[var(--sub)] transition hover:border-[#007AFF]/60 hover:bg-[#007AFF]/5 hover:text-[#007AFF]';
+            btn.className = 'add-cat-btn flex w-full items-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-2.5 py-2 text-sm text-[var(--sub)] transition hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6]';
             btn.textContent = '+ Add Category';
             btn.addEventListener('click', function () { addingCat = true; renderSidebar(); });
             wrap.appendChild(btn);
@@ -855,14 +919,21 @@
         return task;
     }
 
-    function openApp(user) {
-        const data = DB.loadData(user) || {
-            categories: ['Items to Buy', 'Chores / Job Hunt', 'Homework'],
-            tasks: []
-        };
+    function openApp(user, data) {
         state.user = user;
         state.categories = data.categories && data.categories.length ? data.categories : ['Items to Buy', 'Chores / Job Hunt', 'Homework'];
         state.tasks = data.tasks || [];
+        const settings = data.settings || {};
+        state.catArchive = settings.catArchive || {};
+        state.catSort = settings.catSort || {};
+        shortcutsSeen = settings.shortcuts_seen === true || settings.shortcuts_seen === 'true';
+        if (settings.theme) applyTheme(settings.theme);
+        let collapsed = settings.sidebar_collapsed;
+        if (collapsed === undefined) {
+            const saved = localStorage.getItem('sidebar_collapsed');
+            collapsed = saved === '1' || (saved === null && window.innerWidth < 768);
+        }
+        setSidebarCollapsed(!!collapsed);
         state.search = '';
         $('search-input').value = '';
         $('user-avatar').textContent = (user[0] || '?').toUpperCase();
@@ -915,12 +986,13 @@
                 $('login-error').textContent = 'Enter username and password';
                 return;
             }
-            const res = DB.login(username, password);
-            if (!res.ok) {
-                $('login-error').textContent = res.error;
-                return;
-            }
-            openApp(res.user);
+            DB.login(username, password).then(function (res) {
+                if (!res.ok) {
+                    $('login-error').textContent = res.error || 'Login failed — is the server running?';
+                    return;
+                }
+                openApp(res.user, res.data);
+            });
         });
 
         $('register-form').addEventListener('submit', function (e) {
@@ -936,19 +1008,14 @@
                 $('reg-error').textContent = 'Passwords do not match';
                 return;
             }
-            const res = DB.register(username, password);
-            if (!res.ok) {
-                $('reg-error').textContent = res.error;
-                return;
-            }
-            openApp(username);
+            DB.register(username, password).then(function (res) {
+                if (!res.ok) {
+                    $('reg-error').textContent = res.error || 'Registration failed — is the server running?';
+                    return;
+                }
+                openApp(res.user, res.data);
+            });
         });
-
-        if (DB.hasUsers()) {
-            switchTab('login');
-        } else {
-            switchTab('register');
-        }
     }
 
     function initTheme() {
@@ -966,6 +1033,7 @@
         document.documentElement.classList.toggle('dark', theme === 'dark');
         localStorage.setItem('theme', theme);
         updateThemeUI(theme);
+        if (state.user) saveState();
     }
 
     function updateThemeUI(theme) {
@@ -988,14 +1056,13 @@
         $('login-overlay').hidden = true;
     }
 
-    /* Keyboard shortcut helper pill:
-   - First visit/session: prominent toast callout near the dock that fades
-     out after 5s or on the first interaction, then sets
-     localStorage 'taskly_shortcuts_seen' so it never shows prominently again.
-   - Afterwards: faint, borderless inline text anchored bottom-right. */
+    /* Shortcut pill: prominent onboarding callout on the first visit (fades
+       after 5s or on the first interaction, then sets the flag so it never
+       shows prominently again), afterwards a faint bottom-right inline pill.
+       The flag lives in SQLite settings (with a localStorage fallback). */
     function initShortcuts() {
         const pill = $('shortcut-pill');
-        const seen = localStorage.getItem('taskly_shortcuts_seen') === 'true';
+        const seen = shortcutsSeen;
 
         if (!seen) {
             pill.classList.add('pill-onboarding');
@@ -1005,7 +1072,9 @@
             const dismiss = function () {
                 pill.classList.remove('pill-show');
                 pill.hidden = true;
+                shortcutsSeen = true;
                 localStorage.setItem('taskly_shortcuts_seen', 'true');
+                if (state.user) saveState();
                 document.removeEventListener('keydown', onInteract);
                 document.removeEventListener('pointerdown', onInteract);
             };
@@ -1019,21 +1088,33 @@
         }
     }
 
-    /* ---------- Undo toast ---------- */
+    /* ---------- Undo toast (single completion OR batch clear) ---------- */
 
-    let undoTaskId = null;
+    let undoAction = null;
 
-    function showUndoToast(task) {
-        undoTaskId = task.id;
+    function showUndo(msg, action, ms) {
+        undoAction = action;
+        $('undo-toast-msg').textContent = msg;
         const t = $('undo-toast');
         t.classList.remove('hidden');
         t.classList.add('flex');
-        clearTimeout(showUndoToast._t);
-        showUndoToast._t = setTimeout(hideUndoToast, 6000);
+        clearTimeout(showUndo._t);
+        showUndo._t = setTimeout(hideUndoToast, ms);
+    }
+
+    function showUndoToast(task) {
+        showUndo('Task completed', { kind: 'complete', task: task }, 6000);
+    }
+
+    /* Batch undo for the clear-finished action: keeps each removed task's
+       original index so Undo re-inserts them exactly where they were. */
+    function showClearUndo(cleared) {
+        const n = cleared.length;
+        showUndo('Cleared ' + n + ' finished task' + (n > 1 ? 's' : ''), { kind: 'clear', cleared: cleared }, 4000);
     }
 
     function hideUndoToast() {
-        undoTaskId = null;
+        undoAction = null;
         $('undo-toast').classList.add('hidden');
         $('undo-toast').classList.remove('flex');
     }
@@ -1042,6 +1123,7 @@
         state.sidebarCollapsed = collapsed;
         $('sidebar').classList.toggle('collapsed', collapsed);
         localStorage.setItem('sidebar_collapsed', collapsed ? '1' : '0');
+        if (state.user) saveState();
     }
 
     function openCustomPopover() {
@@ -1145,8 +1227,8 @@
     /* Marks the active sidebar mode in the collapse/expand dropdown. */
     function updateSidebarDD() {
         const collapsed = state.sidebarCollapsed;
-        $('dd-collapse').innerHTML = '📉 Collapse sidebar' + (collapsed ? ' <span class="ml-auto text-[#007AFF]">✓</span>' : '');
-        $('dd-expand').innerHTML = '📈 Expand sidebar' + (!collapsed ? ' <span class="ml-auto text-[#007AFF]">✓</span>' : '');
+        $('dd-collapse').innerHTML = '📉 Collapse sidebar' + (collapsed ? ' <span class="ml-auto text-[#8B5CF6]">✓</span>' : '');
+        $('dd-expand').innerHTML = '📈 Expand sidebar' + (!collapsed ? ' <span class="ml-auto text-[#8B5CF6]">✓</span>' : '');
     }
 
     function initModals() {
@@ -1169,15 +1251,45 @@
 
         /* Undo toast: restores the task to its active column instantly */
         $('undo-btn').addEventListener('click', function () {
-            const task = state.tasks.find(function (t) { return t.id === undoTaskId; });
-            if (task) {
-                task.completed = false;
-                task.archived = false;
-                task.completedAt = null;
+            if (!undoAction) { hideUndoToast(); return; }
+            if (undoAction.kind === 'complete') {
+                const task = state.tasks.find(function (t) { return t.id === undoAction.task.id; });
+                if (task) {
+                    task.completed = false;
+                    task.archived = false;
+                    task.completedAt = null;
+                    saveState();
+                    renderAll();
+                }
+            } else if (undoAction.kind === 'clear') {
+                undoAction.cleared.slice().sort(function (a, b) { return a.index - b.index; })
+                    .forEach(function (entry) {
+                        state.tasks.splice(Math.min(entry.index, state.tasks.length), 0, entry.task);
+                    });
                 saveState();
                 renderAll();
             }
             hideUndoToast();
+        });
+
+        /* Clear finished: scoped to the active view (a selected column, or
+           all columns when "All tasks" / no filter is active). */
+        $('clear-finished-btn').addEventListener('click', function () {
+            const cleared = [];
+            state.tasks.forEach(function (t, i) {
+                if (t.archived && (state.filter ? t.category === state.filter : true)) {
+                    cleared.push({ index: i, task: t });
+                }
+            });
+            if (!cleared.length) {
+                showToast(state.filter ? 'No finished tasks in this column' : 'No finished tasks to clear');
+                return;
+            }
+            cleared.slice().sort(function (a, b) { return b.index - a.index; })
+                .forEach(function (entry) { state.tasks.splice(entry.index, 1); });
+            saveState();
+            renderAll();
+            showClearUndo(cleared);
         });
     }
 
@@ -1204,16 +1316,18 @@
            session, persists the current user's namespaced data, and returns
            to the landing page. */
         function signOut() {
-            saveState();
-            DB.logout();
-            showLogin();
-            switchTab('login');
+            /* Flush the last save to SQLite before clearing the session */
+            saveState().catch(function () { }).then(function () {
+                DB.logout();
+                showLogin();
+                switchTab('login');
+            });
         }
         $('logout-btn').addEventListener('click', signOut);
         $('sidebar-logout').addEventListener('click', signOut);
     }
 
-    function init() {
+    async function init() {
         initTheme();
         initLogin();
         initAddForm();
@@ -1225,17 +1339,17 @@
         const savedCollapsed = localStorage.getItem('sidebar_collapsed');
         setSidebarCollapsed(savedCollapsed === '1' || (savedCollapsed === null && window.innerWidth < 768));
 
-        /* Seed the built-in "Vineet" account with the original database. */
-        DB.ensureDefaultUser();
-
-        /* Restore the active session if one exists — this user's own
-           isolated workspace loads straight away, bypassing landing/login. */
-        const session = DB.getSession();
+        /* Resume the active session from SQLite (via the stored token) — the
+           user's own isolated workspace loads straight away. */
+        const session = await DB.restoreSession();
         if (session) {
-            DB.ensureData(session);
-            openApp(session);
+            openApp(session.user, session.data);
         } else {
             showLogin();
+            /* The server seeds the built-in Vineet account on first run */
+            DB.bootstrap().then(function (meta) {
+                switchTab(meta && meta.hasUsers ? 'login' : 'register');
+            });
         }
     }
 

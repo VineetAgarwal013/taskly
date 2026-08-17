@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/classify.js": { "maxDuration": 30 }
+  },
+  "cleanUrls": false
+}

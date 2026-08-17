@@ -1,0 +1,13 @@
+{
+  "name": "taskly",
+  "version": "1.0.0",
+  "description": "Taskly AI — local kanban task manager with AI bucketing (SQLite backend)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "sql.js": "^1.4.0"
+  }
+}
