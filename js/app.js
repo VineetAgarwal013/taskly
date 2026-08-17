@@ -39,7 +39,7 @@
 
     /* Reminder pill toggle: keeps a boolean and reflects it on the button
        (default off-state styling lives in the HTML; these classes swap on). */
-    const REMINDER_ON_CLASSES = ['border-violet-500', 'bg-violet-50', 'text-violet-600', 'font-semibold', 'shadow-sm', 'dark:border-violet-500/50', 'dark:bg-violet-950/40', 'dark:text-violet-400'];
+    const REMINDER_ON_CLASSES = ['border-blue-500', 'bg-blue-50', 'text-blue-600', 'font-semibold', 'shadow-sm', 'dark:border-blue-500/50', 'dark:bg-blue-950/40', 'dark:text-blue-400'];
     const REMINDER_OFF_CLASSES = ['border-slate-200', 'bg-slate-50', 'text-slate-600', 'font-medium', 'dark:border-white/10', 'dark:bg-zinc-800/50', 'dark:text-zinc-400'];
 
     function setReminderOn(on) {
@@ -344,7 +344,7 @@
        The caller's commit callback is responsible for re-rendering. */
     function startInlineEdit(el, value, commit) {
         if (el.isContentEditable) return;
-        const EDIT_CLASSES = ['outline-none', 'ring-2', 'ring-violet-500/40', 'dark:ring-violet-400/40', 'rounded', 'px-1', '-mx-1', 'bg-slate-100/50', 'dark:bg-white/5'];
+        const EDIT_CLASSES = ['outline-none', 'ring-2', 'ring-blue-500/40', 'dark:ring-blue-400/40', 'rounded', 'px-1', '-mx-1', 'bg-slate-100/50', 'dark:bg-white/5'];
         let done = false;
         const finish = function (commitIt) {
             if (done) return;
@@ -408,10 +408,10 @@
                     '<button type="button" class="prio-badge cursor-pointer rounded-md border px-1.5 py-0.5 text-[10px] font-semibold transition-transform hover:scale-105 ' + (prioPill || 'border-[var(--border)] bg-[var(--surface-strong)] text-[var(--sub)]') + '" data-prio="' + task.priority + '" title="Change priority">' + (prio || '—') + '</button>' +
                     (task.archived ? '' :
                     '<div class="prio-pop absolute right-0 top-full z-50 mt-1 hidden min-w-[120px] flex-col gap-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-100 dark:border-white/10 dark:bg-[#252529]">' +
-                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="high"><span class="font-bold text-red-500">!!!</span> High' + (task.priority === 'high' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
-                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="med"><span class="font-bold text-amber-500">!!</span> Medium' + (task.priority === 'med' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
-                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="low"><span class="font-bold text-yellow-400">!</span> Low' + (task.priority === 'low' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
-                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="none"><span class="text-slate-400 dark:text-zinc-500">None</span>' + (task.priority === 'none' ? '<span class="prio-check ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="high"><span class="font-bold text-red-500">!!!</span> High' + (task.priority === 'high' ? '<span class="prio-check ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="med"><span class="font-bold text-amber-500">!!</span> Medium' + (task.priority === 'med' ? '<span class="prio-check ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="low"><span class="font-bold text-yellow-400">!</span> Low' + (task.priority === 'low' ? '<span class="prio-check ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+                        '<button type="button" class="prio-opt flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10" data-prio="none"><span class="text-slate-400 dark:text-zinc-500">None</span>' + (task.priority === 'none' ? '<span class="prio-check ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
                     '</div>') +
                 '</span>' +
                 (badge ? '<span class="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ' + duePill + '">' + escapeHtml(badge.label) + (badge.cls === 'due' ? ' · ' + escapeHtml(fmtShort(task.dueDate)) : '') + '</span>' : '') +
@@ -484,7 +484,7 @@
                     prioPop.querySelectorAll('.prio-opt').forEach(function (o) {
                         const mark = o.querySelector('.prio-check');
                         if (mark) mark.remove();
-                        if (o.dataset.prio === p) o.insertAdjacentHTML('beforeend', '<span class="prio-check text-[#8B5CF6]">✓</span>');
+                        if (o.dataset.prio === p) o.insertAdjacentHTML('beforeend', '<span class="prio-check text-[#007AFF]">✓</span>');
                     });
                     closeAllMenus();
                 });
@@ -511,7 +511,7 @@
         const item = document.createElement('div');
         item.className = 'mini-item flex items-center gap-2.5 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-3 py-2';
         item.innerHTML =
-            '<input type="checkbox" class="checkbox shrink-0 cursor-pointer accent-[#8B5CF6]">' +
+            '<input type="checkbox" class="checkbox shrink-0 cursor-pointer accent-[#007AFF]">' +
             '<span class="min-w-0 flex-1 whitespace-normal break-words text-[13px] text-[var(--text)]" data-edit="title" title="Click to edit">' + escapeHtml(task.title) + '</span>' +
             '<span class="rounded-md border border-red-500/30 bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-400">' + escapeHtml(dueBadge(task.dueDate).label) + '</span>' +
             (PRIO_PILL[task.priority] ? '<span class="rounded-md border px-1.5 py-0.5 text-[10px] font-bold ' + PRIO_PILL[task.priority] + '">' + (PRIO_LABEL[task.priority] || '') + '</span>' : '') +
@@ -549,9 +549,9 @@
         menu.className = 'col-menu absolute right-0 top-12 z-30 w-52 rounded-xl border border-[var(--border)] bg-[var(--menu-bg)] p-1.5 shadow-2xl backdrop-blur-xl';
         menu.innerHTML =
             '<div class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--sub)]">Sort by</div>' +
-            '<button type="button" class="menu-item" data-sort="due">🗓️ Due date' + (sort === 'due' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
-            '<button type="button" class="menu-item" data-sort="priority">⚡ Priority' + (sort === 'priority' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
-            '<button type="button" class="menu-item" data-sort="created">🕐 Created' + (sort === 'created' ? '<span class="ml-auto text-[#8B5CF6]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="due">🗓️ Due date' + (sort === 'due' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="priority">⚡ Priority' + (sort === 'priority' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
+            '<button type="button" class="menu-item" data-sort="created">🕐 Created' + (sort === 'created' ? '<span class="ml-auto text-[#007AFF]">✓</span>' : '') + '</button>' +
             '<div class="my-1 h-px bg-[var(--border)]"></div>' +
             '<button type="button" class="menu-item clear-item text-[var(--danger)] hover:bg-red-500/10">🧹 Clear completed</button>';
 
@@ -610,7 +610,7 @@
                         '<button type="button" class="col-menu-btn flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-strong)] text-[var(--sub)] transition hover:bg-[var(--surface-strong)] hover:text-[var(--text)]" title="Column options">⋮</button>' +
                     '</div>' +
                     '<div class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-[var(--border)]">' +
-                        '<div class="h-full rounded-full bg-gradient-to-r from-[#8B5CF6] to-emerald-400 transition-all duration-500" style="width:' + pct + '%"></div>' +
+                        '<div class="h-full rounded-full bg-gradient-to-r from-[#007AFF] to-emerald-400 transition-all duration-500" style="width:' + pct + '%"></div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="task-list flex flex-1 flex-col gap-2 overflow-y-auto pr-1"></div>';
@@ -626,7 +626,7 @@
             if (active.length === 0) {
                 const drop = document.createElement('button');
                 drop.type = 'button';
-                drop.className = 'drop-zone mt-2 w-full cursor-pointer rounded-xl border-2 border-dashed border-[var(--border)] px-3 py-3 text-xs text-[var(--sub)] transition hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6]';
+                drop.className = 'drop-zone mt-2 w-full cursor-pointer rounded-xl border-2 border-dashed border-[var(--border)] px-3 py-3 text-xs text-[var(--sub)] transition hover:border-[#007AFF]/60 hover:bg-[#007AFF]/5 hover:text-[#007AFF]';
                 drop.textContent = '+ Drag task here or click to add';
                 drop.addEventListener('click', function () {
                     $('category-select').value = cat;
@@ -773,7 +773,7 @@
         } else {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'add-cat-btn flex w-full items-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-2.5 py-2 text-sm text-[var(--sub)] transition hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5 hover:text-[#8B5CF6]';
+            btn.className = 'add-cat-btn flex w-full items-center gap-2 rounded-lg border border-dashed border-[var(--border)] px-2.5 py-2 text-sm text-[var(--sub)] transition hover:border-[#007AFF]/60 hover:bg-[#007AFF]/5 hover:text-[#007AFF]';
             btn.textContent = '+ Add Category';
             btn.addEventListener('click', function () { addingCat = true; renderSidebar(); });
             wrap.appendChild(btn);
@@ -1227,8 +1227,8 @@
     /* Marks the active sidebar mode in the collapse/expand dropdown. */
     function updateSidebarDD() {
         const collapsed = state.sidebarCollapsed;
-        $('dd-collapse').innerHTML = '📉 Collapse sidebar' + (collapsed ? ' <span class="ml-auto text-[#8B5CF6]">✓</span>' : '');
-        $('dd-expand').innerHTML = '📈 Expand sidebar' + (!collapsed ? ' <span class="ml-auto text-[#8B5CF6]">✓</span>' : '');
+        $('dd-collapse').innerHTML = '📉 Collapse sidebar' + (collapsed ? ' <span class="ml-auto text-[#007AFF]">✓</span>' : '');
+        $('dd-expand').innerHTML = '📈 Expand sidebar' + (!collapsed ? ' <span class="ml-auto text-[#007AFF]">✓</span>' : '');
     }
 
     function initModals() {
