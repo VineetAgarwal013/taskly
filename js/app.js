@@ -3,6 +3,7 @@
     const DB = window.TasklyDB;
     const ICS = window.TasklyICS;
     const Voice = window.TasklyVoice;
+    const Algos = window.TasklyAlgos;
 
     const state = {
         user: null,
@@ -110,11 +111,13 @@
         });
     }
 
+    /* Compiled once per query (see Algos.compileSearch): every word must
+       match title, description, category, or tip, in any order. */
+    let searchFn = null, searchFor = null;
     function matchesSearch(t) {
         if (!state.search) return true;
-        const q = state.search.toLowerCase();
-        return t.title.toLowerCase().indexOf(q) !== -1 ||
-            (t.description || '').toLowerCase().indexOf(q) !== -1;
+        if (searchFor !== state.search) { searchFn = Algos.compileSearch(state.search); searchFor = state.search; }
+        return searchFn(t);
     }
 
     function escapeHtml(text) {
@@ -230,18 +233,29 @@
         return '🎯 ' + parts.join(' · ');
     }
 
+    /* Recent successful AI results, keyed by text + categories. */
+    const aiCache = new Map();
+    let aiSeq = 0;
+
     async function runAIClassify(text) {
+        const seq = ++aiSeq;
+        const key = text + '\u0000' + state.categories.join('\u0000');
         setAIStatus('Detecting…', 'busy');
         highlightAITarget(null);
-        const data = await aiClassify(text);
+        const data = aiCache.has(key) ? aiCache.get(key) : await aiClassify(text);
+        /* A newer keystroke started another request — drop this stale one. */
+        if (seq !== aiSeq || $('task-input').value.trim() !== text) return;
         if (!data || !data.ok || !data.result || !data.result.title) {
-            setAIStatus('AI offline — using smart keywords. Add GEMINI_API_KEY to .env to enable.', 'off');
-            clearAIState();
+            applyLocalParse(text);
             return;
         }
+        aiCache.set(key, data);
+        if (aiCache.size > 50) aiCache.delete(aiCache.keys().next().value);
         const r = data.result;
         state.ai = {
             active: true,
+            text: text,
+            title: String(r.title).trim(),
             category: state.categories.indexOf(r.category) !== -1 ? r.category : null,
             priority: sanitizeAIPriority(r.priority) || state.pendingPriority,
             dueDate: sanitizeAIDate(r.dueDate),
@@ -249,6 +263,22 @@
         };
         applyAIFormUI();
         setAIStatus(aiSummary({ ...state.ai, title: r.title }), 'ok');
+    }
+
+    /* Offline fallback: the local parser fills the same fields the AI would. */
+    function applyLocalParse(text) {
+        const p = Algos.parseSpeech(text);
+        state.ai = {
+            active: true,
+            text: text,
+            title: p.title,
+            category: classifyTask(p.title || text),
+            priority: p.priorityDetected ? p.priority : state.pendingPriority,
+            dueDate: p.dueDate,
+            reminderISO: p.reminderISO
+        };
+        applyAIFormUI();
+        setAIStatus(aiSummary(state.ai) + ' (offline keywords)', 'off');
     }
 
     let aiTimer = null;
@@ -291,16 +321,7 @@
     }
 
     function classifyTask(text) {
-        const lower = text.toLowerCase();
-        const hwKeywords = ['homework', 'assignment', 'study', 'class', 'read', 'essay', 'math', 'accounting', 'quiz', 'exam', 'paper', 'register', 'colloquium', 'school', 'course', 'project'];
-        if (hwKeywords.some(function (kw) { return lower.includes(kw); }) && state.categories.indexOf('Homework') !== -1) {
-            return 'Homework';
-        }
-        const choreKeywords = ['apply', 'job', 'resume', 'transfer', 'card', 'wifi', 'clean', 'fix', 'interview', 'pay', 'call', 'email', 'errand', 'laundry', 'bank', 'credit', 'send', 'remove'];
-        if (choreKeywords.some(function (kw) { return lower.includes(kw); }) && state.categories.indexOf('Chores / Job Hunt') !== -1) {
-            return 'Chores / Job Hunt';
-        }
-        return state.categories[0];
+        return Algos.classifyLocal(text, state.categories, state.tasks);
     }
 
     function addTask(opts) {
@@ -879,6 +900,9 @@
 
     function submitNewTask(title, opts) {
         const ai = state.ai;
+        /* Use the cleaned title ("Buy milk", not "buy milk tomorrow 5pm")
+           when the detection ran on exactly this text. */
+        if (ai.active && ai.text === title && ai.title) title = ai.title;
         const due = opts.dueDate !== undefined
             ? opts.dueDate
             : (ai.active && ai.dueDate ? ai.dueDate : resolveDueDate());
@@ -966,7 +990,38 @@
         $('reg-error').textContent = '';
     }
 
+    /* Landing tabs: Product (home) / Project Story / Evals.
+       #story and #evals deep-link. */
+    function showLandingTab(name) {
+        $('landing-home').hidden = name !== 'home';
+        $('landing-story').hidden = name !== 'story';
+        $('landing-evals').hidden = name !== 'evals';
+        Array.prototype.forEach.call(document.querySelectorAll('.landing-tab'), function (b) {
+            const on = b.dataset.landingTab === name;
+            b.classList.toggle('bg-blue-50', on);
+            b.classList.toggle('text-blue-600', on);
+            b.classList.toggle('text-slate-500', !on);
+        });
+    }
+
+    function initLandingTabs() {
+        const go = function (name) {
+            showLandingTab(name);
+            history.replaceState(null, '', name === 'home' ? location.pathname : '#' + name);
+            window.scrollTo(0, 0);
+        };
+        Array.prototype.forEach.call(document.querySelectorAll('.landing-tab'), function (b) {
+            b.addEventListener('click', function () { go(b.dataset.landingTab); });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-goto-tab]'), function (a) {
+            a.addEventListener('click', function (e) { e.preventDefault(); go(a.dataset.gotoTab); });
+        });
+        const hash = location.hash.slice(1);
+        showLandingTab(hash === 'story' || hash === 'evals' ? hash : 'home');
+    }
+
     function initLogin() {
+        initLandingTabs();
         /* Landing CTA buttons open the auth modal */
         $('landing-signin').addEventListener('click', openAuthModal);
         $('landing-cta').addEventListener('click', openAuthModal);
@@ -1295,9 +1350,14 @@
 
     function initSearch() {
         const input = $('search-input');
+        let searchTimer = null;
+        /* Re-render once typing pauses, not on every keystroke. */
         input.addEventListener('input', function () {
-            state.search = this.value.trim();
-            renderAll();
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function () {
+                state.search = input.value.trim();
+                renderAll();
+            }, 120);
         });
         $('search-clear').addEventListener('click', function () {
             input.value = '';

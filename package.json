@@ -4,7 +4,10 @@
   "description": "Taskly AI — local kanban task manager with AI bucketing (SQLite backend)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node bench/api-test.js && node bench/ab.js && node bench/ab.js --holdout",
+    "eval:robust": "node bench/robustness.js",
+    "eval:gemini": "node bench/ab.js --holdout --gemini -v"
   },
   "license": "ISC",
   "dependencies": {

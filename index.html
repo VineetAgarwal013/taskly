@@ -17,17 +17,27 @@
     <!-- ============ SECTION 1: LANDING PAGE ============ -->
     <div id="landing" class="min-h-screen bg-slate-50 text-slate-900">
         <!-- Landing header -->
-        <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+        <header class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-y-3 px-6 py-5">
             <div class="flex items-center gap-2.5">
                 <svg class="h-8 w-8" viewBox="0 0 24 24" fill="#2563eb"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
                 <span class="text-xl font-bold tracking-tight text-slate-900">Taskly AI</span>
             </div>
+            <!-- Landing tabs: product home / project story -->
+            <nav class="order-last flex w-full items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:order-none sm:w-auto">
+                <button type="button" data-landing-tab="home"
+                    class="landing-tab rounded-lg px-3.5 py-1.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900">Product</button>
+                <button type="button" data-landing-tab="story"
+                    class="landing-tab rounded-lg px-3.5 py-1.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900">Project Story</button>
+                <button type="button" data-landing-tab="evals"
+                    class="landing-tab rounded-lg px-3.5 py-1.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900">Evals</button>
+            </nav>
             <button id="landing-signin" type="button"
                 class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                 Sign In
             </button>
         </header>
 
+        <div id="landing-home">
         <!-- Hero -->
         <main class="mx-auto max-w-4xl px-6 pb-20 pt-16 text-center sm:pt-24">
             <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-600">
@@ -63,6 +73,347 @@
                 <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Symmetrical, centered board layout that adapts to your workload — nothing piles up.</p>
             </div>
         </section>
+        </div>
+
+        <!-- ============ LANDING TAB: PROJECT STORY ============
+             Problem (survey) → Solution (Taskly) → Evaluation & iterations.
+             Every number below is either the survey result or a measured
+             benchmark result from bench/ (npm test). -->
+        <div id="landing-story" hidden>
+            <main class="mx-auto max-w-4xl px-6 pb-12 pt-16 text-center sm:pt-20">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-600">
+                    📖 Project Story
+                </span>
+                <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+                    From a survey finding to a <span class="text-blue-600">tested product.</span>
+                </h1>
+                <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500">
+                    Problem found through research → solution built → product evaluated → changes tested → improvements shipped.
+                </p>
+            </main>
+
+            <!-- Section 1: The problem -->
+            <section class="mx-auto max-w-5xl px-6 pb-16">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">01 · The Problem</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Students are juggling more than they can track</h2>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm sm:col-span-1">
+                        <div class="text-5xl font-extrabold tracking-tight text-blue-600">70<span class="text-2xl text-slate-400">/100</span></div>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-500">students in our MBA batch said they <strong class="text-slate-900">struggle with managing their tasks</strong>.</p>
+                        <p class="mt-3 text-xs text-slate-400">Source: our batch survey (n = 100).</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm sm:col-span-2">
+                        <h3 class="text-base font-bold text-slate-900">What students are balancing</h3>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div class="flex gap-3"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">📚</div><p class="text-sm leading-relaxed text-slate-500"><strong class="text-slate-900">Assignments</strong> with different deadlines across several courses.</p></div>
+                            <div class="flex gap-3"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">👥</div><p class="text-sm leading-relaxed text-slate-500"><strong class="text-slate-900">Group projects</strong> that depend on other people's schedules.</p></div>
+                            <div class="flex gap-3"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">💼</div><p class="text-sm leading-relaxed text-slate-500"><strong class="text-slate-900">Recruiting</strong>: applications, coffee chats and interview prep.</p></div>
+                            <div class="flex gap-3"><div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50">🏠</div><p class="text-sm leading-relaxed text-slate-500"><strong class="text-slate-900">Daily life</strong>: bills, errands and things to buy.</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Why existing methods fall short</h3>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• Notes apps and paper lists capture tasks but don't sort or prioritize them.</li>
+                            <li>• Full project tools ask for too many fields to log a quick “buy printer ink”.</li>
+                            <li>• School, recruiting and personal tasks live in different places, so deadlines slip between them.</li>
+                        </ul>
+                        <p class="mt-3 text-xs text-slate-400">Team's qualitative assessment, not a survey statistic.</p>
+                    </div>
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Problem statement</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">MBA students lose track of tasks because capturing, sorting and prioritizing them across school, recruiting and life takes more effort than they have time for.</p>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Hypothesis</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">If adding a task takes one sentence, and the app files, prioritizes and dates it automatically, students will keep everything in one place and miss fewer deadlines.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: The solution -->
+            <section class="mx-auto max-w-5xl px-6 pb-16">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">02 · The Solution</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Introducing Taskly AI</h2>
+                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">One sentence in, a sorted board out. Type or say a task, and Taskly picks the column, priority, deadline and reminder.</p>
+
+                <figure class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <img src="img/taskly-app.png" alt="Taskly board with Items to Buy, Chores / Job Hunt and Homework columns, priority and deadline badges, and the quick-add dock" class="block w-full" loading="lazy">
+                    <figcaption class="border-t border-slate-200 px-5 py-3 text-left text-xs text-slate-400">The Taskly board (demo account, sample tasks).</figcaption>
+                </figure>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🎤</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Quick-add dock: text or voice</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> logging a task takes too long. <span class="font-semibold text-slate-700">Fix:</span> one sentence like “finance case tomorrow 5pm”, typed or spoken.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🤖</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">AI auto-bucketing</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> school, recruiting and life tasks get mixed up. <span class="font-semibold text-slate-700">Fix:</span> every task is filed into the right column automatically.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">⏰</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Priorities, deadlines, reminders</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> deadlines slip. <span class="font-semibold text-slate-700">Fix:</span> !!! / !! / ! tags, Today / Tomorrow / Overdue badges, and calendar reminders.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🔍</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Instant search (Ctrl K)</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> tasks are hard to find again. <span class="font-semibold text-slate-700">Fix:</span> search across titles, notes and columns.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">📁</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Your own categories</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> every student organizes differently. <span class="font-semibold text-slate-700">Fix:</span> rename or add columns; drag cards between them.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🧹</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Zero clutter</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Problem:</span> long lists feel overwhelming. <span class="font-semibold text-slate-700">Fix:</span> finished tasks animate into an archive that clears itself.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Evaluation, A/B testing, iterations -->
+            <section class="mx-auto max-w-5xl px-6 pb-20">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">03 · Evaluation, A/B Testing &amp; Iterations</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Measuring the old version against the new one</h2>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Previous version: what was wrong</h3>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• <strong class="text-slate-900">Search</strong> matched only an exact phrase, so “buy seeds” or “report q3” found nothing.</li>
+                            <li>• <strong class="text-slate-900">Offline bucketing</strong> only knew two hard-coded column names, so renamed columns always got the first one, and “bread” went to Homework because it contains “read”.</li>
+                            <li>• <strong class="text-slate-900">Voice parsing</strong> was never actually called. It also missed “at 4”, read 3/12 as December 3rd, and cut words like “at” and “before” out of titles.</li>
+                            <li>• <strong class="text-slate-900">AI requests</strong> could arrive out of order and overwrite a newer result.</li>
+                            <li>• <strong class="text-slate-900">Server</strong>: the database file (including logins) could be downloaded from the URL bar, and a few requests could crash it.</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Changes made</h3>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• <strong class="text-slate-900">Search</strong> matches every word in any order, across title, notes and column, and waits for typing to pause.</li>
+                            <li>• <strong class="text-slate-900">Bucketing</strong> matches whole words, links keyword groups to whatever columns you name, and learns from tasks already in each column.</li>
+                            <li>• <strong class="text-slate-900">Voice and quick-add</strong> run the fixed parser whenever AI is unavailable, so dates, times and priorities still fill in.</li>
+                            <li>• <strong class="text-slate-900">AI</strong>: old responses are discarded, repeated text is cached, and near-miss category names are mapped to real columns.</li>
+                            <li>• <strong class="text-slate-900">Server</strong> only serves the app's own files, starts after the database is ready, and answers oversized uploads once.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900">How we evaluated: an offline A/B benchmark</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                        Version A (the original code, kept unchanged) and version B (the new code) ran on the same labeled examples: search queries with the tasks they should find, task phrases with the right column, and spoken sentences with the correct title, priority, date and time.
+                        Because the team that wrote B also wrote the first test set, a <strong class="text-slate-900">second, held-out set was written independently, without seeing the new code</strong>. The held-out results below are the honest ones.
+                    </p>
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full min-w-[520px] text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-400">
+                                    <th class="py-2 pr-4 font-semibold">Held-out test (measured)</th>
+                                    <th class="py-2 pr-4 font-semibold">A · before</th>
+                                    <th class="py-2 pr-4 font-semibold">B · after</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-600">
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 font-semibold text-slate-900">Search: queries with exactly the right results</td><td class="py-2.5 pr-4">13 / 21</td><td class="py-2.5 pr-4 font-semibold text-blue-600">21 / 21</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 font-semibold text-slate-900">Search: share of relevant tasks found (recall)</td><td class="py-2.5 pr-4">51.6%</td><td class="py-2.5 pr-4 font-semibold text-blue-600">100%</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 font-semibold text-slate-900">Offline bucketing: right column</td><td class="py-2.5 pr-4">24 / 49 (49%)</td><td class="py-2.5 pr-4 font-semibold text-blue-600">33 / 49 (67%)</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 pl-4 text-slate-500">· default columns</td><td class="py-2.5 pr-4">17 / 23</td><td class="py-2.5 pr-4 font-semibold text-blue-600">22 / 23</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 pl-4 text-slate-500">· custom-named columns</td><td class="py-2.5 pr-4">7 / 26</td><td class="py-2.5 pr-4 font-semibold text-blue-600">11 / 26</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 font-semibold text-slate-900">Voice: sentences parsed fully correctly</td><td class="py-2.5 pr-4">26 / 43</td><td class="py-2.5 pr-4 font-semibold text-blue-600">40 / 43</td></tr>
+                                <tr class="border-b border-slate-100"><td class="py-2.5 pr-4 pl-4 text-slate-500">· due date / reminder time correct</td><td class="py-2.5 pr-4">34 / 31 of 43</td><td class="py-2.5 pr-4 font-semibold text-blue-600">41 / 41 of 43</td></tr>
+                                <tr><td class="py-2.5 pr-4 font-semibold text-slate-900">API end-to-end checks</td><td class="py-2.5 pr-4">—</td><td class="py-2.5 pr-4 font-semibold text-blue-600">20 / 20 pass</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-400">On the team's own (tuning) set, B scored 27/27, 58/58 and 38/38. Those numbers are inflated by design, so they aren't headlined. All results are reproducible with <code class="rounded bg-slate-100 px-1 py-0.5">npm test</code>. Full details are in the <a href="#evals" data-goto-tab="evals" class="font-semibold text-blue-600 hover:text-blue-500">Evals tab</a>.</p>
+                </div>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <span class="inline-flex rounded-full border border-blue-100 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600">Retained</span>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• New search, bucketing and voice parser: each beat A on the held-out set.</li>
+                            <li>• All server and AI-reliability fixes.</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <span class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-xs font-semibold text-orange-600">Revised</span>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• The first version of new search was about 9× slower than A. After caching it measures about 1.5 ms vs 0.6 ms per query over 5,000 tasks: slower than A, but unnoticeable.</li>
+                            <li>• Bucketing filed one task wrong that A got right (“costco run” went to Health because of “run”).</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-600">Not shipped yet</span>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-slate-500">
+                            <li>• A rewritten AI prompt (B). The live comparison hit the Gemini API quota before it could be measured, so the original prompt stays until there is data.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-6 text-left shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900">Final outcome</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                        On tests written without seeing the new code, search finds every relevant task (recall 52% → 100%) and the right number of results for every query (13 → 21 of 21).
+                        Offline filing is right more often (49% → 67%), and spoken tasks come out fully correct 40 times in 43 instead of 26.
+                        Students' data is no longer exposed by the server.
+                    </p>
+                    <p class="mt-3 text-xs text-slate-500">Limits: this is an offline benchmark on labeled examples, not a test with live users. Whether students actually miss fewer deadlines is still a hypothesis to test next with the batch.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ LANDING TAB: EVALS ============
+             Every result below comes from bench/ (npm test, bench/robustness.js,
+             bench/ab.js --gemini). Pending rows are filled from the live run. -->
+        <div id="landing-evals" hidden>
+            <main class="mx-auto max-w-4xl px-6 pb-12 pt-16 text-center sm:pt-20">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-600">
+                    🧪 Evals
+                </span>
+                <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+                    How we know it <span class="text-blue-600">actually works.</span>
+                </h1>
+                <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500">
+                    Twelve evals across accuracy, reliability and safety: what each one checks, what it found, and how we fixed it.
+                </p>
+            </main>
+
+            <!-- Method -->
+            <section class="mx-auto max-w-5xl px-6 pb-16">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">01 · Method</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">An offline A/B test you can re-run</h2>
+                <div class="mt-6 grid gap-6 sm:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🅰️</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Frozen baseline</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">An exact copy of the old code (A) runs next to the new code (B) on identical inputs.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🏷️</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Labeled examples</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Each example states what a person would expect: the right tasks, column, date or time.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🙈</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Held-out set</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">A second set written without seeing the new code, so B can't be tuned to pass it.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-xl">🚦</div>
+                        <h3 class="mt-4 text-base font-bold text-slate-900">Regression gate</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">The test run fails if B is worse than A on any metric, so a change can't quietly make things worse.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scorecard -->
+            <section class="mx-auto max-w-5xl px-6 pb-16">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">02 · Scorecard</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Every eval and its result</h2>
+                <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[760px] text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-400">
+                                    <th class="py-2 pr-4 font-semibold">Eval</th>
+                                    <th class="py-2 pr-4 font-semibold">Question</th>
+                                    <th class="py-2 pr-4 font-semibold">How</th>
+                                    <th class="py-2 pr-4 font-semibold">Result (measured)</th>
+                                    <th class="py-2 pr-4 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Search relevance</td><td class="py-3 pr-4 text-slate-500">Does search find what the student meant?</td><td class="py-3 pr-4 text-slate-500">21 held-out queries with the correct tasks</td><td class="py-3 pr-4 text-slate-600">Exact results 13 → 21 of 21; recall 52% → 100%; precision 100% both</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Improved</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Offline bucketing</td><td class="py-3 pr-4 text-slate-500">Without AI, is a task filed in the right column?</td><td class="py-3 pr-4 text-slate-500">49 held-out tasks across 3 column sets</td><td class="py-3 pr-4 text-slate-600">49% → 67% correct</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Improved</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Voice / quick-add parsing</td><td class="py-3 pr-4 text-slate-500">Are title, priority, date and time pulled out correctly?</td><td class="py-3 pr-4 text-slate-500">43 held-out spoken sentences, clock frozen</td><td class="py-3 pr-4 text-slate-600">Fully correct 26 → 40 of 43</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Improved</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">AI bucketing: prompt A vs B</td><td class="py-3 pr-4 text-slate-500">Does the rewritten Gemini prompt file tasks better?</td><td class="py-3 pr-4 text-slate-500">Same 49 tasks sent to Gemini with each prompt</td><td class="py-3 pr-4 text-slate-600"><span id="eval-gemini-bucket">Running…</span></td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-slate-200 bg-slate-50 text-slate-600">Pending</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">AI vs offline parser</td><td class="py-3 pr-4 text-slate-500">How much does Gemini add over the offline parser?</td><td class="py-3 pr-4 text-slate-500">Same 43 sentences sent to Gemini</td><td class="py-3 pr-4 text-slate-600"><span id="eval-gemini-voice">Running…</span></td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-slate-200 bg-slate-50 text-slate-600">Pending</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">API end-to-end</td><td class="py-3 pr-4 text-slate-500">Do sign-up, login, saving and AI endpoints behave?</td><td class="py-3 pr-4 text-slate-500">20 scripted checks on a scratch database</td><td class="py-3 pr-4 text-slate-600">20 / 20 pass</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Pass</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Data privacy</td><td class="py-3 pr-4 text-slate-500">Can anyone download private files?</td><td class="py-3 pr-4 text-slate-500">Request the database, secrets file and server code by URL</td><td class="py-3 pr-4 text-slate-600">Before: database downloadable. After: all blocked</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Fixed</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Robustness (fuzz)</td><td class="py-3 pr-4 text-slate-500">Does odd input crash anything?</td><td class="py-3 pr-4 text-slate-500">5,000 random inputs: emoji, 10k-char text, symbols</td><td class="py-3 pr-4 text-slate-600">0 crashes, 0 malformed outputs</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Pass</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Impossible dates</td><td class="py-3 pr-4 text-slate-500">Is “2/30” rejected rather than moved to March 2?</td><td class="py-3 pr-4 text-slate-500">5 impossible dates</td><td class="py-3 pr-4 text-slate-600">Before: 4 of 5 became the wrong real date. After: 5 / 5 rejected</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Fixed</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Search noise</td><td class="py-3 pr-4 text-slate-500">Does typing one letter flood the board?</td><td class="py-3 pr-4 text-slate-500">1–2 letter queries on 18 tasks</td><td class="py-3 pr-4 text-slate-600">“a” matched 15 of 18 → 6 of 18</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-blue-100 bg-blue-50 text-blue-600">Fixed</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Scale</td><td class="py-3 pr-4 text-slate-500">Is saving still fast for a huge board?</td><td class="py-3 pr-4 text-slate-500">Save and load 100 / 1,000 / 5,000 tasks</td><td class="py-3 pr-4 text-slate-600">5,000 tasks: 164 ms save, 1.2 MB sent on every edit</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-orange-200 bg-orange-50 text-orange-600">Watch</span></td></tr>
+                                <tr class="border-b border-slate-100 align-top"><td class="py-3 pr-4 font-semibold text-slate-900">Two devices at once</td><td class="py-3 pr-4 text-slate-500">If laptop and phone both edit, are both changes kept?</td><td class="py-3 pr-4 text-slate-500">Two sessions each add one task</td><td class="py-3 pr-4 text-slate-600">One task is lost: the last save overwrites the board</td><td class="py-3 pr-4"><span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold border-red-200 bg-red-50 text-red-600">Open</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-400">Accuracy rows use the held-out set. Commands: <code class="rounded bg-slate-100 px-1 py-0.5">npm test</code>, <code class="rounded bg-slate-100 px-1 py-0.5">node bench/robustness.js</code>, <code class="rounded bg-slate-100 px-1 py-0.5">node bench/ab.js --holdout --gemini</code>.</p>
+                </div>
+            </section>
+
+            <!-- Issue → fix -->
+            <section class="mx-auto max-w-5xl px-6 pb-16">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">03 · What we found and how we solved it</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Issue → evidence → fix</h2>
+                <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">🔍 Search missed obvious matches</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> “report q3” and “groceries” returned nothing; 8 of 21 queries were wrong.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Fix:</span> match each word separately, in any order, across title, notes and column. One-letter words must start a word.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">🤖 Sorting broke for renamed columns</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> custom columns got 7 of 26 right; “bread” went to Homework because it contains “read”.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Fix:</span> whole-word matching, keyword groups linked to column names, and learning from tasks already in each column.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">🎤 Voice dates and times were lost</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> the parser was never called; it also missed “at 4”, read 3/12 as Dec 3, and turned “2/30” into March 2.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Fix:</span> wired it in as the offline fallback; added US dates, “noon”, bare hours, and rejection of impossible dates.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">🔒 Private data was downloadable</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> opening <code class="rounded bg-slate-100 px-1 py-0.5">/taskly.db</code> downloaded the database, including password hashes and login tokens.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Fix:</span> the server now only serves the page and its own asset folders.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">⚡ AI results arrived out of order</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> a slow reply for old text could overwrite the suggestion for newer text. The API quota also ran out mid-test.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Fix:</span> stale replies are dropped, repeats are cached, and the offline parser fills in whenever AI fails.</p>
+                    </div>
+                    <div class="rounded-2xl border border-red-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">📱 Edits from two devices (open)</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Evidence:</span> laptop and phone each added a task; only the phone's survived.</p>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500"><span class="font-semibold text-slate-700">Planned fix:</span> save individual changes with a version number, and reload instead of overwriting when the board changed elsewhere.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Missing evals -->
+            <section class="mx-auto max-w-5xl px-6 pb-20">
+                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">04 · Not yet covered</p>
+                <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Evals still missing</h2>
+                <div class="mt-6 grid gap-6 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-left shadow-sm sm:col-span-3">
+                        <span class="inline-flex rounded-full border border-blue-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-blue-600">Most important</span>
+                        <h3 class="mt-3 text-base font-bold text-slate-900">Study with students from the batch</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-600">Every result above is offline. The survey's question, whether students manage tasks better, needs real use: time to add a task, share of tasks AI files correctly in daily use, missed deadlines over two weeks compared with how they work today, and a short usability score (SUS).</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Speech recognition</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Tests start from text. How well the browser turns speech into text (accents, noisy rooms, Safari vs Chrome) is unmeasured.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">Accessibility</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">No WCAG audit yet: keyboard-only use, screen readers, color contrast of the priority badges.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900">AI safety and cost</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-slate-500">Task text that tries to instruct the AI, AI cost per student per month, and behavior under the free-tier rate limit at class scale.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
     <!-- ============ SECTION 2: AUTHENTICATION MODAL ============ -->
@@ -292,6 +643,7 @@
     <div id="toast" class="toast" hidden></div>
 
     <script src="data/default-tasks.js"></script>
+    <script src="js/algos.js"></script>
     <script src="js/db.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/voice.js"></script>
