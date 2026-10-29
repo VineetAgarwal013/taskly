@@ -13,19 +13,13 @@ window.TasklyICS = (function () {
         return String(s).replace(/[\\;,]/g, function (c) { return '\\' + c; }).replace(/\n/g, '\\n');
     }
 
-    function makeICS(opts) {
+    function vevent(opts) {
         const title = opts.title || 'Taskly task';
         const description = opts.description || '';
         const start = new Date(opts.date);
         const end = new Date(start.getTime() + (opts.durationMin || 60) * 60000);
         const uid = 'taskly-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '@taskly.local';
-
-        const lines = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//Taskly AI//Task Reminder//EN',
-            'CALSCALE:GREGORIAN',
-            'METHOD:PUBLISH',
+        return [
             'BEGIN:VEVENT',
             'UID:' + uid,
             'DTSTAMP:' + fmtDT(new Date()),
@@ -38,9 +32,22 @@ window.TasklyICS = (function () {
             'DESCRIPTION:Reminder: ' + escapeLine(title),
             'TRIGGER:-PT15M',
             'END:VALARM',
-            'END:VEVENT',
-            'END:VCALENDAR'
+            'END:VEVENT'
         ];
+    }
+
+    /* One calendar file; pass an array to put several reminders in it. */
+    function makeICS(opts) {
+        const events = Array.isArray(opts) ? opts : [opts];
+        let lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Taskly AI//Task Reminder//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH'
+        ];
+        events.forEach(function (e) { lines = lines.concat(vevent(e)); });
+        lines.push('END:VCALENDAR');
         return lines.join('\r\n') + '\r\n';
     }
 

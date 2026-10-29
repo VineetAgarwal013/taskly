@@ -195,27 +195,8 @@ window.TasklyDB = (function () {
                 })
             };
         }
-        const stamp = Date.now();
-        const mk = function (id, title, tip, category, priority) {
-            return {
-                id: id + '-' + stamp, title: title, description: '', tip: tip,
-                category: category, priority: priority,
-                createdDate: todayStr(), createdAt: created,
-                dueDate: null, reminder: null,
-                completed: false, completedAt: null, archived: false
-            };
-        };
-        return {
-            categories: ['🎯 Getting Started', '💡 Pro Tips', '📁 Sample Project'],
-            tasks: [
-                mk('gs-1', 'Welcome to Taskly AI 👋', 'Check the box — it animates into the Archive', '🎯 Getting Started', 'high'),
-                mk('gs-2', 'Add your first task', 'Type in the dock below and press Enter', '🎯 Getting Started', 'med'),
-                mk('tp-1', 'Use priorities', '!!! High · !! Medium · ! Low', '💡 Pro Tips', 'med'),
-                mk('tp-2', 'Set a deadline', 'Pick a date in the dock’s deadline menu', '💡 Pro Tips', 'low'),
-                mk('sp-1', 'Plan your week', 'Drag cards between columns', '📁 Sample Project', 'low'),
-                mk('sp-2', 'Organize with categories', 'Use “+ Add Category” in the sidebar', '📁 Sample Project', 'low')
-            ]
-        };
+        /* New accounts start simple: three empty lists for an MBA student. */
+        return { categories: ['Jobs', 'Personal Tasks', 'Homework'], tasks: [] };
     }
 
     function ensureVineetAccount() {

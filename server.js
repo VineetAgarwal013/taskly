@@ -268,27 +268,10 @@ function seedDataFor(userId, username) {
             });
         });
     } else {
-        const stamp = Date.now();
-        const mk = function (id, title, tip, category, priority) {
-            return {
-                id: id + '-' + stamp, title: title, description: '', tip: tip,
-                category: category, priority: priority,
-                createdDate: todayStr(), createdAt: created,
-                dueDate: null, reminder: null,
-                completed: false, completedAt: null, archived: false
-            };
-        };
-        ['🎯 Getting Started', '💡 Pro Tips', '📁 Sample Project'].forEach(function (name, i) {
+        /* New accounts start simple: three empty lists for an MBA student. */
+        ['Jobs', 'Personal Tasks', 'Homework'].forEach(function (name, i) {
             db.run('INSERT INTO categories (user_id, name, position) VALUES (?, ?, ?)', [userId, name, i]);
         });
-        [
-            mk('gs-1', 'Welcome to Taskly AI 👋', 'Check the box — it animates into the Archive', '🎯 Getting Started', 'high'),
-            mk('gs-2', 'Add your first task', 'Type in the dock below and press Enter', '🎯 Getting Started', 'med'),
-            mk('tp-1', 'Use priorities', '!!! High · !! Medium · ! Low', '💡 Pro Tips', 'med'),
-            mk('tp-2', 'Set a deadline', 'Pick a date in the dock’s deadline menu', '💡 Pro Tips', 'low'),
-            mk('sp-1', 'Plan your week', 'Drag cards between columns', '📁 Sample Project', 'low'),
-            mk('sp-2', 'Organize with categories', 'Use “+ Add Category” in the sidebar', '📁 Sample Project', 'low')
-        ].forEach(function (t) { insertTask(userId, t); });
     }
     persistSoon();
 }
@@ -462,10 +445,21 @@ function handleClassify(req, res) {
             sendJSON(res, 200, { ok: false, error: 'missing_key', message: 'Add your GEMINI_API_KEY to the .env file and restart the server.' });
             return;
         }
-        const text = String(body.text || '').trim();
         const categories = Array.isArray(body.categories) && body.categories.length
             ? body.categories
             : ['Items to Buy', 'Chores / Job Hunt', 'Homework'];
+        /* List mode: several already-split tasks in one Gemini call. */
+        if (Array.isArray(body.items)) {
+            const items = body.items.slice(0, 50).map(function (x) { return String(x).slice(0, 300); });
+            if (!items.length) { sendJSON(res, 400, { ok: false, error: 'no_items' }); return; }
+            Gemini.classifyList(items, categories, { apiKey: API_KEY }).then(function (results) {
+                sendJSON(res, 200, { ok: true, results: results });
+            }).catch(function (err) {
+                sendJSON(res, 200, { ok: false, error: 'gemini_error', message: String(err.message || err) });
+            });
+            return;
+        }
+        const text = String(body.text || '').trim();
         if (text.length < 3) {
             sendJSON(res, 400, { ok: false, error: 'text_too_short' });
             return;

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node bench/api-test.js && node bench/ab.js && node bench/ab.js --holdout",
+    "test": "node bench/api-test.js && node bench/split-test.js && node bench/multi-eval.js && node bench/ab.js && node bench/ab.js --holdout",
     "eval:robust": "node bench/robustness.js",
     "eval:gemini": "node bench/ab.js --holdout --gemini -v"
   },

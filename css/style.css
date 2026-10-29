@@ -450,9 +450,10 @@ body.landing-mode {
 
 /* ---------- AI status ---------- */
 
+/* Sits just above the dock, which grows with multi-line input. */
 .ai-status {
-    position: fixed;
-    bottom: 175px;
+    position: absolute;
+    bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 40;

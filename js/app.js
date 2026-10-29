@@ -17,7 +17,8 @@
         customTime: null,
         catArchive: {},
         catSort: {},
-        ai: { active: false, category: null, priority: null, dueDate: null, reminderISO: null }
+        ai: { active: false, category: null, priority: null, dueDate: null, reminderISO: null },
+        batch: null
     };
 
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -233,6 +234,76 @@
         return '🎯 ' + parts.join(' · ');
     }
 
+    /* ---------- New-column suggestion ---------- */
+
+    /* Offered when a task fits none of the columns: from the AI (it named a
+       column that doesn't exist) or offline (Algos.suggestBucket). Names the
+       user dismissed aren't offered again this session. */
+    const dismissedBuckets = new Set();
+    let bucketSuggestion = null;
+    /* True once the user picks a column in the dock themselves (the AI also
+       fills that dropdown, which shouldn't block a suggestion). */
+    let columnPickedByUser = false;
+
+    function titleCase(s) {
+        return String(s).trim().replace(/\s+/g, ' ').replace(/(^|\s)\S/g, function (c) { return c.toUpperCase(); });
+    }
+
+    function pickBucketSuggestion(text, aiCategory) {
+        if (aiCategory && state.categories.indexOf(aiCategory) === -1 && String(aiCategory).trim().length > 1) {
+            return titleCase(aiCategory).slice(0, 30);
+        }
+        return Algos.suggestBucket(text, state.categories, state.tasks);
+    }
+
+    function showBucketSuggestion(name) {
+        const box = $('bucket-suggest');
+        if (!name || dismissedBuckets.has(name.toLowerCase()) || state.categories.indexOf(name) !== -1 || columnPickedByUser) {
+            bucketSuggestion = null;
+            box.classList.add('hidden');
+            return;
+        }
+        bucketSuggestion = name;
+        $('bucket-suggest-text').innerHTML = '💡 Doesn’t fit your columns. Create <strong class="text-slate-900 dark:text-zinc-100">' + escapeHtml(name) + '</strong>?';
+        box.classList.remove('hidden');
+    }
+
+    function hideBucketSuggestion() {
+        bucketSuggestion = null;
+        $('bucket-suggest').classList.add('hidden');
+    }
+
+    function addColumnIfMissing(name) {
+        if (!name || state.categories.indexOf(name) !== -1) return false;
+        state.categories.push(name);
+        return true;
+    }
+
+    function bindBucketSuggestion() {
+        $('category-select').addEventListener('change', function () {
+            columnPickedByUser = !!this.value;
+            if (columnPickedByUser) hideBucketSuggestion();
+        });
+        $('bucket-suggest-yes').addEventListener('click', function () {
+            const name = bucketSuggestion;
+            if (!name) return;
+            addColumnIfMissing(name);
+            saveState();
+            renderAll();
+            $('category-select').value = name;
+            if (state.ai.active) state.ai.category = name;
+            highlightAITarget(name);
+            hideBucketSuggestion();
+            showToast('Created “' + name + '” — this task will go there');
+            $('task-input').focus();
+        });
+        $('bucket-suggest-no').addEventListener('click', function () {
+            if (bucketSuggestion) dismissedBuckets.add(bucketSuggestion.toLowerCase());
+            hideBucketSuggestion();
+            $('task-input').focus();
+        });
+    }
+
     /* Recent successful AI results, keyed by text + categories. */
     const aiCache = new Map();
     let aiSeq = 0;
@@ -263,6 +334,7 @@
         };
         applyAIFormUI();
         setAIStatus(aiSummary({ ...state.ai, title: r.title }), 'ok');
+        showBucketSuggestion(pickBucketSuggestion(text, r.category));
     }
 
     /* Offline fallback: the local parser fills the same fields the AI would. */
@@ -279,13 +351,180 @@
         };
         applyAIFormUI();
         setAIStatus(aiSummary(state.ai) + ' (offline keywords)', 'off');
+        showBucketSuggestion(pickBucketSuggestion(p.title || text));
     }
 
     let aiTimer = null;
+
+    /* ---------- Several tasks in one message ---------- */
+
+    /* state.batch = { text, items: [...], single } while the dock holds a
+       list. Items come from Algos.parseTaskList; one Gemini call then
+       refines them (fields the user edited in the preview are kept). */
+    const listCache = new Map();
+
+    function autoGrow(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }
+
+    function clearBatch() {
+        state.batch = null;
+        $('batch-preview').classList.add('hidden');
+        $('batch-preview').innerHTML = '';
+    }
+
+    function renderBatchPreview() {
+        const box = $('batch-preview');
+        const b = state.batch;
+        if (!b || b.single || b.items.length < 2) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+        const catOptions = function (sel, suggest) {
+            let html = state.categories.map(function (c) {
+                return '<option value="' + escapeHtml(c) + '"' + (c === sel ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
+            }).join('');
+            /* A suggested new column; picking it creates the column on Add. */
+            if (suggest && state.categories.indexOf(suggest) === -1) {
+                html += '<option value="' + escapeHtml(suggest) + '"' + (suggest === sel ? ' selected' : '') + '>＋ New: ' + escapeHtml(suggest) + '</option>';
+            }
+            return html;
+        };
+        box.innerHTML =
+            '<div class="flex items-center justify-between px-1 pb-1">' +
+                '<span class="text-xs font-semibold text-slate-500 dark:text-zinc-400">📋 Add ' + b.items.length + ' tasks?</span>' +
+                '<button type="button" data-batch="single" class="text-xs font-semibold text-[#007AFF] hover:underline">Keep as one task</button>' +
+            '</div>' +
+            b.items.map(function (it, i) {
+                return '<div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1 dark:border-white/10 dark:bg-white/5" data-i="' + i + '">' +
+                    '<span class="shrink-0 text-[10px] font-bold ' + ({ high: 'text-red-500', med: 'text-orange-500', low: 'text-yellow-600' }[it.priority] || 'text-slate-400') + '">' + (PRIO_LABEL[it.priority] || '') + '</span>' +
+                    '<input data-f="title" value="' + escapeHtml(it.title) + '" class="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none dark:text-zinc-100">' +
+                    (it.suggest && state.categories.indexOf(it.suggest) === -1 && it.category !== it.suggest
+                        ? '<button type="button" data-batch="usenew" title="Doesn’t fit your columns. Use a new “' + escapeHtml(it.suggest) + '” column" class="shrink-0 rounded-md border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-[#007AFF] dark:border-blue-500/20 dark:bg-blue-950/30">💡 ' + escapeHtml(it.suggest) + '</button>'
+                        : '') +
+                    '<select data-f="category" class="max-w-[9rem] shrink-0 rounded-md border border-slate-200 bg-white px-1 py-0.5 text-xs text-slate-600 outline-none dark:border-white/10 dark:bg-[#1c1c1f] dark:text-white/70">' + catOptions(it.category, it.suggest) + '</select>' +
+                    '<input data-f="dueDate" type="date" value="' + (it.dueDate || '') + '" class="shrink-0 rounded-md border border-slate-200 bg-white px-1 py-0.5 text-xs text-slate-600 outline-none dark:border-white/10 dark:bg-[#1c1c1f] dark:text-white/70">' +
+                    (it.reminderISO ? '<span class="shrink-0 text-xs" title="Reminder ' + escapeHtml(timeLabel(it.reminderISO)) + '">🔔</span>' : '') +
+                    '<button type="button" data-batch="remove" title="Remove" class="shrink-0 rounded px-1 text-xs text-slate-400 hover:text-red-500">✕</button>' +
+                '</div>';
+            }).join('');
+        box.classList.remove('hidden');
+    }
+
+    function bindBatchPreview() {
+        const box = $('batch-preview');
+        const itemOf = function (el) {
+            const row = el.closest('[data-i]');
+            return row && state.batch ? state.batch.items[+row.dataset.i] : null;
+        };
+        box.addEventListener('input', function (e) {
+            const it = itemOf(e.target);
+            const f = e.target.dataset.f;
+            if (!it || !f) return;
+            it.edited = it.edited || {};
+            it.edited[f] = true;
+            if (f === 'title') it.title = e.target.value;
+            if (f === 'category') it.category = e.target.value;
+            if (f === 'dueDate') {
+                it.dueDate = e.target.value || null;
+                if (it.reminderISO) it.reminderISO = it.dueDate ? it.dueDate + it.reminderISO.slice(10) : null;
+            }
+        });
+        box.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-batch]');
+            if (!btn || !state.batch) return;
+            if (btn.dataset.batch === 'single') {
+                /* Treat the whole message as one task (normal single path). */
+                state.batch.single = true;
+                renderBatchPreview();
+                setAIStatus(null);
+                const text = $('task-input').value.trim();
+                if (text.length >= 8) runAIClassify(text);
+            } else if (btn.dataset.batch === 'usenew') {
+                const it = state.batch.items[+btn.closest('[data-i]').dataset.i];
+                it.category = it.suggest;
+                it.edited = it.edited || {};
+                it.edited.category = true;
+                renderBatchPreview();
+            } else if (btn.dataset.batch === 'remove') {
+                state.batch.items.splice(+btn.closest('[data-i]').dataset.i, 1);
+                renderBatchPreview();
+                if (state.batch.items.length < 2) setAIStatus(null);
+            }
+        });
+    }
+
+    /* One Gemini request for the whole list; offline results stay if it fails. */
+    async function runAIList(text) {
+        const b = state.batch;
+        const seq = ++aiSeq;
+        const items = b.items.map(function (it) { return it.text; });
+        const key = items.join('\u0001') + '\u0000' + state.categories.join('\u0000');
+        setAIStatus('Checking ' + items.length + ' tasks…', 'busy');
+        let data = listCache.get(key);
+        if (!data && window.location.protocol !== 'file:') {
+            try {
+                const res = await fetch('/api/classify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: items, categories: state.categories })
+                });
+                data = await res.json();
+            } catch (e) { data = null; }
+        }
+        if (seq !== aiSeq || state.batch !== b || b.single) return;
+        if (!data || !data.ok || !Array.isArray(data.results) || data.results.length !== b.items.length) {
+            setAIStatus('📋 ' + b.items.length + ' tasks (offline keywords)', 'off');
+            return;
+        }
+        listCache.set(key, data);
+        if (listCache.size > 20) listCache.delete(listCache.keys().next().value);
+        data.results.forEach(function (r, i) {
+            const it = b.items[i];
+            const ed = it.edited || {};
+            if (!ed.title && r.title) it.title = String(r.title).trim();
+            if (sanitizeAIPriority(r.priority)) it.priority = sanitizeAIPriority(r.priority);
+            if (!ed.dueDate) {
+                it.dueDate = sanitizeAIDate(r.dueDate) || it.dueDate;
+                it.reminderISO = sanitizeAIReminder(r.reminder) || it.reminderISO;
+            }
+            if (!ed.category && !it.headerCategory && state.categories.indexOf(r.category) !== -1) it.category = r.category;
+            else if (!it.headerCategory && r.category && state.categories.indexOf(r.category) === -1) it.suggest = pickBucketSuggestion(it.title, r.category);
+        });
+        renderBatchPreview();
+        setAIStatus('🎯 AI checked ' + b.items.length + ' tasks', 'ok');
+    }
+
     function bindAIDetection() {
-        $('task-input').addEventListener('input', function () {
+        const input = $('task-input');
+        /* Enter adds; Shift+Enter starts a new line (for lists). */
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                e.preventDefault();
+                $('add-form').requestSubmit();
+            }
+        });
+        bindBatchPreview();
+        bindBucketSuggestion();
+        input.addEventListener('input', function () {
+            autoGrow(this);
+            hideBucketSuggestion();
             const text = this.value.trim();
             clearTimeout(aiTimer);
+            const kept = state.batch && state.batch.single && state.batch.text === text;
+            const items = kept ? [] : Algos.parseTaskList(text, state.categories, state.tasks);
+            if (items.length > 1) {
+                items.forEach(function (it) {
+                    if (!it.headerCategory) it.suggest = Algos.suggestBucket(it.title, state.categories, state.tasks);
+                });
+                aiSeq++;
+                clearAIState();
+                state.batch = { text: text, items: items, single: false };
+                renderBatchPreview();
+                setAIStatus('📋 ' + items.length + ' tasks (press Enter to add all)', 'ok');
+                const b = state.batch;
+                aiTimer = setTimeout(function () { if (state.batch === b) runAIList(text); }, 600);
+                return;
+            }
+            if (!kept) clearBatch();
             if (text.length < 8) {
                 clearAIState();
                 setAIStatus(null);
@@ -705,6 +944,8 @@
             board.appendChild(col);
         });
 
+        if (!state.search && !state.filter) board.appendChild(buildAddListTile());
+
         /* Search with zero visible columns → friendly empty state. */
         if (state.search && visible === 0) {
             board.innerHTML = '<div class="w-full py-16 text-center text-sm text-[var(--sub)]">No tasks match “' + escapeHtml(state.search) + '”</div>';
@@ -770,6 +1011,43 @@
         state.categories.push(v);
         saveState();
         renderAll();
+    }
+
+    /* "＋ Add list" tile at the end of the board (same as "+ Add Category"
+       in the sidebar, where students will look for it first). */
+    let addingList = false;
+    function buildAddListTile() {
+        const tile = document.createElement('div');
+        tile.className = 'flex w-[330px] min-w-0 shrink-0 items-start';
+        if (addingList) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'field w-full';
+            input.placeholder = 'List name, e.g. Clubs, Travel, Fitness…';
+            input.maxLength = 40;
+            input.autocomplete = 'off';
+            const done = function (save) {
+                if (!addingList) return;
+                addingList = false;
+                if (save && input.value.trim()) commitAddCategory(input.value);
+                else renderColumns();
+            };
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') done(true);
+                else if (e.key === 'Escape') done(false);
+            });
+            input.addEventListener('blur', function () { done(true); });
+            tile.appendChild(input);
+            setTimeout(function () { input.focus(); }, 0);
+        } else {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border)] px-4 py-5 text-sm font-medium text-[var(--sub)] transition hover:border-[#007AFF]/60 hover:bg-[#007AFF]/5 hover:text-[#007AFF]';
+            btn.textContent = '＋ Add list';
+            btn.addEventListener('click', function () { addingList = true; renderColumns(); });
+            tile.appendChild(btn);
+        }
+        return tile;
     }
 
     function buildAddCatRow() {
@@ -929,7 +1207,7 @@
             reminderISO: reminderISO
         });
 
-        if (reminderISO) {
+        if (reminderISO && !opts.noIcs) {
             const file = 'taskly-reminder-' + Date.now() + '.ics';
             ICS.downloadICS(file, ICS.makeICS({
                 title: task.title,
@@ -943,9 +1221,45 @@
         return task;
     }
 
+    /* Adds every item from the list preview as its own task. Anything
+       picked in the dock (column, deadline) applies to items that don't
+       state their own; reminders go into one .ics file; one Undo removes
+       the whole batch. */
+    function submitManyTasks(items) {
+        clearAIState();
+        /* Columns picked from "＋ New: …" suggestions are created first. */
+        let created = 0;
+        items.forEach(function (it) { if (it.title && addColumnIfMissing(it.category)) created++; });
+        if (created) renderAll();
+        const catSelect = $('category-select').value;
+        const added = [];
+        const reminders = [];
+        items.forEach(function (it) {
+            const title = String(it.title || '').trim();
+            if (!title) return;
+            const task = submitNewTask(title, {
+                category: catSelect && !(it.edited && it.edited.category) && !it.headerCategory ? catSelect : it.category,
+                priority: it.priorityDetected || it.priority !== 'med' ? it.priority : state.pendingPriority,
+                dueDate: it.dueDate || resolveDueDate(),
+                reminderISO: it.reminderISO || undefined,
+                noIcs: true
+            });
+            added.push(task);
+            if (task.reminder) {
+                reminders.push({ title: task.title, description: 'Reminder from Taskly AI', date: new Date(task.reminder) });
+            }
+        });
+        if (reminders.length) {
+            ICS.downloadICS('taskly-reminders-' + Date.now() + '.ics', ICS.makeICS(reminders));
+            showToast(reminders.length + ' reminder' + (reminders.length > 1 ? 's' : '') + ' saved to one .ics file — import it into your calendar');
+        }
+        showUndo('Added ' + added.length + ' tasks', { kind: 'batch', ids: added.map(function (t) { return t.id; }) }, 8000);
+        return added;
+    }
+
     function openApp(user, data) {
         state.user = user;
-        state.categories = data.categories && data.categories.length ? data.categories : ['Items to Buy', 'Chores / Job Hunt', 'Homework'];
+        state.categories = data.categories && data.categories.length ? data.categories : ['Jobs', 'Personal Tasks', 'Homework'];
         state.tasks = data.tasks || [];
         const settings = data.settings || {};
         state.catArchive = settings.catArchive || {};
@@ -1143,7 +1457,7 @@
         }
     }
 
-    /* ---------- Undo toast (single completion OR batch clear) ---------- */
+    /* ---------- Undo toast (completion, batch clear, or batch add) ---------- */
 
     let undoAction = null;
 
@@ -1220,8 +1534,14 @@
             const input = $('task-input');
             const text = input.value.trim();
             if (!text) return;
-            submitNewTask(text, {});
+            const b = state.batch;
+            if (b && !b.single && b.items.length > 1) submitManyTasks(b.items);
+            else submitNewTask(text, {});
+            clearBatch();
+            hideBucketSuggestion();
+            columnPickedByUser = false;
             input.value = '';
+            autoGrow(input);
             $('deadline-select').value = '';
             state.customDate = null;
             state.customTime = null;
@@ -1316,6 +1636,11 @@
                     saveState();
                     renderAll();
                 }
+            } else if (undoAction.kind === 'batch') {
+                const ids = undoAction.ids;
+                state.tasks = state.tasks.filter(function (t) { return ids.indexOf(t.id) === -1; });
+                saveState();
+                renderAll();
             } else if (undoAction.kind === 'clear') {
                 undoAction.cleared.slice().sort(function (a, b) { return a.index - b.index; })
                     .forEach(function (entry) {

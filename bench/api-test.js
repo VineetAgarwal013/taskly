@@ -69,7 +69,8 @@ async function main() {
     server.stderr.on('data', function (c) { log += c; });
     await new Promise(function (resolve, reject) {
         const t = setTimeout(function () { reject(new Error('server did not start:\n' + log)); }, 10000);
-        server.stdout.on('data', function () { if (/running at/.test(log)) { clearTimeout(t); resolve(); } });
+        /* Wait for the last startup line, which says whether the Gemini key loaded. */
+        server.stdout.on('data', function () { if (/Gemini API:/.test(log)) { clearTimeout(t); resolve(); } });
     });
     const hasKey = /key loaded/.test(log);
     const R = function (m, u, o) { return request(port, m, u, o); };
@@ -90,12 +91,12 @@ async function main() {
         const r = await R('POST', '/api/auth/register', { body: { username: user, password: 'abc' } });
         assert.strictEqual(r.status, 400);
     });
-    await check('register creates account with seed data (201)', async function () {
+    await check('register creates account with the three empty starter lists (201)', async function () {
         const r = await R('POST', '/api/auth/register', { body: { username: user, password: 'secret1' } });
         assert.strictEqual(r.status, 201);
         assert.ok(r.json.token);
-        assert.strictEqual(r.json.data.categories.length, 3);
-        assert.strictEqual(r.json.data.tasks.length, 6);
+        assert.deepStrictEqual(r.json.data.categories, ['Jobs', 'Personal Tasks', 'Homework']);
+        assert.strictEqual(r.json.data.tasks.length, 0);
     });
     await check('register rejects a duplicate username (409)', async function () {
         const r = await R('POST', '/api/auth/register', { body: { username: user, password: 'secret1' } });
@@ -155,6 +156,19 @@ async function main() {
         assert.strictEqual(r.json.ok, true, JSON.stringify(r.json).slice(0, 300));
         assert.strictEqual(r.json.result.category, 'Homework');
         assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(r.json.result.dueDate), 'dueDate ' + r.json.result.dueDate);
+    });
+    await check('POST /api/classify list mode rejects an empty list (400)', async function () {
+        const r = await R('POST', '/api/classify', { body: { items: [] } });
+        if (!hasKey) { assert.strictEqual(r.json.error, 'missing_key'); return; }
+        assert.strictEqual(r.status, 400);
+    });
+    await check('POST /api/classify list mode: one call returns one result per item (live Gemini)', async function () {
+        if (!hasKey) throw new Error('skipped: no GEMINI_API_KEY in .env');
+        const items = ['buy printer ink', 'study for midterm friday', 'tomorrow: call mom at 5'];
+        const r = await R('POST', '/api/classify', { body: { items: items, categories: ['Items to Buy', 'Chores / Job Hunt', 'Homework'] } });
+        assert.strictEqual(r.json.ok, true, JSON.stringify(r.json).slice(0, 300));
+        assert.strictEqual(r.json.results.length, 3);
+        assert.strictEqual(r.json.results[1].category, 'Homework');
     });
     await check('logout invalidates the token', async function () {
         const out = await R('POST', '/api/auth/logout', { token: token });

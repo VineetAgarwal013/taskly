@@ -21,10 +21,21 @@ module.exports = function (req, res) {
             res.status(200).json({ ok: false, error: 'missing_key', message: 'Set GEMINI_API_KEY in the Vercel environment variables.' });
             return;
         }
-        const text = String(input.text || '').trim();
         const categories = Array.isArray(input.categories) && input.categories.length
             ? input.categories
             : ['Items to Buy', 'Chores / Job Hunt', 'Homework'];
+        /* List mode: several already-split tasks in one Gemini call. */
+        if (Array.isArray(input.items)) {
+            const items = input.items.slice(0, 50).map(function (x) { return String(x).slice(0, 300); });
+            if (!items.length) { res.status(400).json({ ok: false, error: 'no_items' }); return; }
+            Gemini.classifyList(items, categories, { apiKey: process.env.GEMINI_API_KEY }).then(function (results) {
+                res.status(200).json({ ok: true, results: results });
+            }).catch(function (err) {
+                res.status(200).json({ ok: false, error: 'gemini_error', message: String(err.message || err) });
+            });
+            return;
+        }
+        const text = String(input.text || '').trim();
         if (text.length < 3) {
             res.status(400).json({ ok: false, error: 'text_too_short' });
             return;
